@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>오늘아이돌봄 - 동탄 키즈 공간 지도</title>
+<title>오늘아이돌봄 - 수도권 키즈 공간 지도</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -31,6 +31,21 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .btn-primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .btn-primary:hover{background:var(--brand-dark);color:#fff;border-color:var(--brand-dark)}
 
+/* Region bar */
+.region-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;align-items:center}
+.region-bar::-webkit-scrollbar{display:none}
+.region-label{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;margin-right:4px;flex-shrink:0}
+.region-chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);transition:all 0.15s;user-select:none}
+.region-chip:hover{border-color:var(--brand);color:var(--brand)}
+.region-chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* District bar - shown when region selected */
+.district-bar{background:#fff8f5;border-bottom:1px solid var(--border);padding:6px 16px;display:flex;gap:5px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;align-items:center}
+.district-bar::-webkit-scrollbar{display:none}
+.district-chip{padding:3px 10px;border-radius:14px;font-size:11px;font-weight:500;white-space:nowrap;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text2);transition:all 0.15s;user-select:none}
+.district-chip:hover{border-color:var(--brand);color:var(--brand)}
+.district-chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+
 .quick-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
 .quick-bar::-webkit-scrollbar{display:none}
 .chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);transition:all 0.15s;user-select:none}
@@ -49,17 +64,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .view-bar{background:#fff;border-bottom:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .count{font-size:12px;color:var(--text2);font-weight:500}
 .count span{color:var(--brand);font-weight:700}
+.region-badge{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;color:var(--brand);font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px}
 .view-toggle{display:flex;gap:2px;background:#f3f4f6;border-radius:8px;padding:3px}
 .vbtn{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);transition:all 0.15s;user-select:none}
 .vbtn.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
 
 .main{display:flex;flex:1;overflow:hidden;min-height:0}
 
-.map-panel{flex:1;position:relative;overflow:hidden}
-.map-svg{width:100%;height:100%}
-.map-pin{cursor:pointer}
-.map-pin .pin-circle{transition:all 0.2s;transform-origin:center}
-.map-pin:hover .pin-circle{transform:scale(1.25)}
+.map-panel{flex:1;position:relative;overflow:hidden;background:#e8f4e8}
+.map-panel-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column}
+
+/* Map area selector UI */
+.metro-map{width:100%;height:100%;position:relative;overflow:hidden}
+.metro-map svg{width:100%;height:100%}
+.region-group{cursor:pointer;transition:all 0.2s}
+.region-group:hover .region-path{opacity:0.85;filter:brightness(1.08)}
+.region-group.selected .region-path{stroke-width:2.5;filter:brightness(0.95)}
+.region-path{transition:all 0.2s;stroke:#fff;stroke-width:1.2}
+.region-text{font-size:11px;font-weight:600;fill:#333;pointer-events:none;font-family:'Noto Sans KR',sans-serif}
+.region-count{font-size:9px;fill:#666;pointer-events:none;font-family:'Noto Sans KR',sans-serif}
+
 .map-tooltip{position:absolute;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.13);pointer-events:none;z-index:20;min-width:150px;max-width:200px;display:none}
 .tt-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px}
 .tt-cat{font-size:10px;color:var(--text2);margin-bottom:3px}
@@ -69,6 +93,19 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .legend-row{display:flex;align-items:center;gap:5px;margin-bottom:3px}
 .legend-row:last-child{margin-bottom:0}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* Map pins overlay */
+.pins-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.pin-svg{width:100%;height:100%;pointer-events:all}
+.map-pin{cursor:pointer}
+.map-pin .pin-circle{transition:all 0.2s;transform-origin:center}
+.map-pin:hover .pin-circle{transform:scale(1.25)}
+
+/* Welcome/no-region state */
+.map-welcome{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:20px}
+.map-welcome-icon{font-size:48px;margin-bottom:4px}
+.map-welcome h3{font-size:16px;font-weight:700;color:var(--text)}
+.map-welcome p{font-size:12px;color:var(--text2);max-width:220px}
 
 .list-panel{width:340px;flex-shrink:0;overflow-y:auto;border-left:1px solid var(--border);background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .list-panel::-webkit-scrollbar{width:4px}
@@ -94,13 +131,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .footer-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:#f3f4f6;color:var(--text2);font-weight:500}
 .footer-tag.orange{background:#fff7ed;color:var(--brand)}
 .chevron{margin-left:auto;color:var(--text3);font-size:16px;line-height:1}
+.region-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:#eff6ff;color:#2563eb;font-weight:600}
 
 .no-results{padding:40px 16px;text-align:center;color:var(--text2)}
 .no-results-icon{font-size:36px;margin-bottom:10px}
 .reset-btn{margin-top:12px;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text2);transition:all 0.15s}
 .reset-btn:hover{border-color:var(--brand);color:var(--brand)}
 
-/* Mobile */
 @media(max-width:640px){
   .list-panel{width:100%}
   .map-panel{display:none}
@@ -119,13 +156,25 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="logo-icon">🗺️</div>
     <div class="logo-text">
       <h1>오늘아이돌봄</h1>
-      <p>동탄 키즈 공간 지도</p>
+      <p>수도권 키즈 공간 지도</p>
     </div>
   </div>
   <div style="display:flex;gap:6px">
     <button class="btn-sm btn-primary" onclick="alert('업체 등록 기능 준비 중입니다.')">업체 등록</button>
   </div>
 </div>
+
+<!-- 지역 선택 바 -->
+<div class="region-bar">
+  <span class="region-label">📍 지역</span>
+  <button class="region-chip active" id="rgn-all" onclick="selectRegion('')">전체</button>
+  <button class="region-chip" id="rgn-seoul" onclick="selectRegion('서울')">서울</button>
+  <button class="region-chip" id="rgn-gyeonggi" onclick="selectRegion('경기')">경기</button>
+  <button class="region-chip" id="rgn-incheon" onclick="selectRegion('인천')">인천</button>
+</div>
+
+<!-- 구/시 선택 바 (지역 선택 시 표시) -->
+<div class="district-bar" id="district-bar" style="display:none"></div>
 
 <div class="quick-bar">
   <button class="chip" id="chip-today" onclick="toggleQuick('today')">✅ 오늘 가능</button>
@@ -139,7 +188,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 <div class="cat-bar" id="cat-bar"></div>
 
 <div class="view-bar">
-  <div class="count">총 <span id="count-num">0</span>개 장소</div>
+  <div class="count">총 <span id="count-num">0</span>개 장소<span class="region-badge" id="region-badge" style="display:none"></span></div>
   <div class="view-toggle">
     <button class="vbtn active" id="vbtn-split" onclick="setView('split')">분할</button>
     <button class="vbtn" id="vbtn-map" onclick="setView('map')">지도</button>
@@ -149,13 +198,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
 <div class="main" id="main-area">
   <div class="map-panel" id="map-panel">
-    <svg class="map-svg" id="map-svg" viewBox="0 0 600 420"></svg>
+    <svg id="map-svg" style="width:100%;height:100%;display:block"></svg>
     <div class="map-legend">
       <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div>오늘 이용 가능</div>
       <div class="legend-row"><div class="legend-dot" style="background:#94a3b8"></div>예약 문의</div>
       <div class="legend-row"><div class="legend-dot" style="background:#eab308;outline:2px solid #d97706;outline-offset:1px;border-radius:50%"></div>추천 장소</div>
     </div>
     <div class="map-tooltip" id="map-tooltip"></div>
+    <div class="map-welcome" id="map-welcome">
+      <div class="map-welcome-icon">🗺️</div>
+      <h3>지역을 선택하세요</h3>
+      <p>상단에서 지역을 선택하면<br>해당 지역의 장소를 지도에서 볼 수 있어요</p>
+    </div>
   </div>
   <div class="list-panel" id="list-panel">
     <div class="list-inner" id="list-inner"></div>
@@ -169,39 +223,131 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
 <script>
 const PLACES=[
-  {id:1,name:"키즈파크 동탄점",category:"kids_cafe",address:"경기도 화성시 동탄반석로 160",lat:37.209,lng:127.075,phone:"031-123-4567",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1만~1.5만원 (보호자 무료)",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true},
-  {id:2,name:"동탄 키즈카페 플레이그라운드",category:"kids_cafe",address:"경기도 화성시 동탄반석로 120",lat:37.211,lng:127.077,phone:"031-234-5678",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:true},
-  {id:3,name:"동탄 아이체험관",category:"experience_center",address:"경기도 화성시 동탄대로 537",lat:37.2145,lng:127.0812,phone:"031-345-6789",operatingHours:"화~일 09:30~18:30",ageDescription:"만 3세~10세",priceDescription:"프로그램당 1.5만~2.5만원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:4,name:"화성시 동탄도서관 어린이실",category:"library_program",address:"경기도 화성시 동탄문화로 40",lat:37.2078,lng:127.0698,phone:"031-456-7890",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:5,name:"동탄 시간제보육 어린이집",category:"hourly_care",address:"경기도 화성시 동탄순환대로 21길 14",lat:37.2055,lng:127.0822,phone:"031-567-8901",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원 (정부지원)",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:false,mealProvided:true,isFeatured:true},
-  {id:6,name:"동탄 공동육아나눔터",category:"shared_care",address:"경기도 화성시 동탄대로 1039",lat:37.2032,lng:127.0765,phone:"031-678-9012",operatingHours:"월~금 09:00~17:00",ageDescription:"만 12세 이하",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false},
-  {id:7,name:"리틀아티스트 미술학원",category:"art_cooking_science",address:"경기도 화성시 동탄반석로 55",lat:37.2118,lng:127.0735,phone:"031-789-0123",operatingHours:"토~일 10:00~17:00",ageDescription:"만 4세~초등 3학년",priceDescription:"1회 2만~3만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:8,name:"동탄 쿠킹클래스 꼬마셰프",category:"art_cooking_science",address:"경기도 화성시 동탄대로 615",lat:37.2162,lng:127.0798,phone:"031-890-1234",operatingHours:"토 10:00~17:00",ageDescription:"만 5세~초등 6학년",priceDescription:"1회 3.5만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:9,name:"동탄 과학체험관 씽크빅",category:"experience_center",address:"경기도 화성시 동탄순환대로 7",lat:37.2048,lng:127.0841,phone:"031-901-2345",operatingHours:"화~일 10:00~19:00",ageDescription:"만 5세~초등 6학년",priceDescription:"입장료 8,000원~1.2만원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:10,name:"화성시 육아종합지원센터 동탄",category:"childcare_support_center",address:"경기도 화성시 동탄대로 1077",lat:37.2025,lng:127.0712,phone:"031-012-3456",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료 (일부 소정 비용)",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:11,name:"동탄 방문미술 아뜰리에",category:"art_cooking_science",address:"경기도 화성시 동탄반석로 88",lat:37.2135,lng:127.0758,phone:"010-1234-5678",operatingHours:"월~토 (예약제)",ageDescription:"만 3세~초등 6학년",priceDescription:"월 8회 기준 10만~15만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false},
-  {id:12,name:"동탄 방학특강 수학·과학 캠프",category:"vacation_class",address:"경기도 화성시 동탄대로 777",lat:37.2188,lng:127.0821,phone:"031-111-2222",operatingHours:"방학 중 월~금 09:00~13:00",ageDescription:"초등 1~6학년",priceDescription:"1주 코스 5만원",availableToday:false,availableWeekend:false,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:13,name:"동탄 짐보리 체육교실",category:"experience_center",address:"경기도 화성시 동탄순환대로 55",lat:37.2068,lng:127.0878,phone:"031-222-3333",operatingHours:"월~토 09:30~19:00",ageDescription:"만 6개월~7세",priceDescription:"체험 수업 1회 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:14,name:"동탄 어린이 수영장",category:"public_kids_facility",address:"경기도 화성시 동탄문화로 55",lat:37.2092,lng:127.0655,phone:"031-333-4444",operatingHours:"월~토 09:00~21:00",ageDescription:"만 4세 이상",priceDescription:"1회 3,000원~5,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:15,name:"동탄 플레이타임 실내놀이터",category:"kids_cafe",address:"경기도 화성시 동탄반석로 200",lat:37.2075,lng:127.0795,phone:"031-444-5555",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~8세",priceDescription:"아이 1만원, 보호자 무료",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:true},
-  {id:16,name:"동탄 키즈요가 & 발레",category:"one_day_class",address:"경기도 화성시 동탄대로 888",lat:37.2155,lng:127.0845,phone:"010-5555-6666",operatingHours:"토~일 10:00~17:00",ageDescription:"만 3세~초등 3학년",priceDescription:"1회 체험 1.5만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false},
-  {id:17,name:"동탄 어린이 도예 공방",category:"one_day_class",address:"경기도 화성시 동탄반석로 33",lat:37.2102,lng:127.0712,phone:"031-666-7777",operatingHours:"화~일 10:00~18:00",ageDescription:"만 5세~초등 6학년",priceDescription:"1회 체험 2만~2.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false},
-  {id:18,name:"동탄 시간제보육 (동탄2)",category:"hourly_care",address:"경기도 화성시 동탄순환대로 12길 8",lat:37.2038,lng:127.0855,phone:"031-777-8888",operatingHours:"월~금 09:00~17:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원 (정부지원)",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:false,mealProvided:true,isFeatured:false},
-  {id:19,name:"동탄 어린이 영어 원데이클래스",category:"one_day_class",address:"경기도 화성시 동탄대로 999",lat:37.2178,lng:127.0768,phone:"031-888-9999",operatingHours:"토 10:00~16:00",ageDescription:"만 5세~초등 2학년",priceDescription:"1회 2만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false},
-  {id:20,name:"동탄 자연생태 체험 농장",category:"experience_center",address:"경기도 화성시 동탄면 동탄로 123",lat:37.1988,lng:127.0732,phone:"031-999-0000",operatingHours:"토~일 10:00~17:00",ageDescription:"전 연령",priceDescription:"입장료 1만원 (체험 별도)",availableToday:false,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false},
+  // === 서울 강남구 ===
+  {id:101,name:"코엑스 키즈파크",category:"kids_cafe",region:"서울",district:"강남구",address:"서울 강남구 영동대로 513",lat:37.5115,lng:127.0590,phone:"02-6002-5300",operatingHours:"매일 10:30~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1.5만~2만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
+  {id:102,name:"강남구 육아종합지원센터",category:"childcare_support_center",region:"서울",district:"강남구",address:"서울 강남구 논현로 430",lat:37.5172,lng:127.0286,phone:"02-3452-9901",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
+  {id:103,name:"테헤란로 어린이 원데이클래스",category:"one_day_class",region:"서울",district:"강남구",address:"서울 강남구 테헤란로 152",lat:37.5006,lng:127.0368,phone:"02-555-1234",operatingHours:"토~일 10:00~17:00",ageDescription:"만 5세~초등 3학년",priceDescription:"1회 2.5만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
+
+  // === 서울 마포구 ===
+  {id:201,name:"홍대 키즈카페 토이랜드",category:"kids_cafe",region:"서울",district:"마포구",address:"서울 마포구 와우산로 94",lat:37.5511,lng:126.9242,phone:"02-333-2222",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:true,isFeatured:true,isFree:false},
+  {id:202,name:"마포구 어린이도서관",category:"library_program",region:"서울",district:"마포구",address:"서울 마포구 독막로 324",lat:37.5396,lng:126.9052,phone:"02-3153-8580",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
+  {id:203,name:"망원 쿠킹스튜디오 꼬마요리사",category:"art_cooking_science",region:"서울",district:"마포구",address:"서울 마포구 월드컵로 147",lat:37.5560,lng:126.9046,phone:"010-7777-8888",operatingHours:"토~일 10:00~17:00",ageDescription:"만 4세~초등 6학년",priceDescription:"1회 3만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:false},
+
+  // === 서울 송파구 ===
+  {id:301,name:"잠실 롯데월드 어드벤처 키즈존",category:"kids_cafe",region:"서울",district:"송파구",address:"서울 송파구 올림픽로 240",lat:37.5111,lng:127.0981,phone:"02-411-2000",operatingHours:"매일 09:30~22:00",ageDescription:"전 연령",priceDescription:"입장료 별도",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:true,isFeatured:true,isFree:false},
+  {id:302,name:"송파 시간제보육센터",category:"hourly_care",region:"서울",district:"송파구",address:"서울 송파구 올림픽로35길 137",lat:37.5145,lng:127.1058,phone:"02-443-1234",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
+  {id:303,name:"방이동 어린이 미술공방",category:"art_cooking_science",region:"서울",district:"송파구",address:"서울 송파구 방이동 올림픽로 99",lat:37.5152,lng:127.1214,phone:"02-422-5555",operatingHours:"화~일 10:00~19:00",ageDescription:"만 4세~초등 6학년",priceDescription:"월 8회 12만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:false},
+
+  // === 서울 노원구 ===
+  {id:401,name:"노원 어린이 과학관",category:"experience_center",region:"서울",district:"노원구",address:"서울 노원구 동일로 1238",lat:37.6554,lng:127.0563,phone:"02-971-6232",operatingHours:"화~일 09:30~17:30",ageDescription:"만 5세~중학생",priceDescription:"3,000원~5,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
+  {id:402,name:"공릉동 키즈카페 레인보우",category:"kids_cafe",region:"서울",district:"노원구",address:"서울 노원구 동일로 1500",lat:37.6401,lng:127.0728,phone:"02-933-4567",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~8세",priceDescription:"아이 1만원, 보호자 무료",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
+
+  // === 경기 성남시 (분당) ===
+  {id:501,name:"판교 테크노밸리 키즈파크",category:"kids_cafe",region:"경기",district:"성남시",address:"경기도 성남시 분당구 판교역로 235",lat:37.3948,lng:127.1113,phone:"031-709-5000",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
+  {id:502,name:"분당 어린이체험관",category:"experience_center",region:"경기",district:"성남시",address:"경기도 성남시 분당구 야탑로 81",lat:37.4113,lng:127.1274,phone:"031-737-4000",operatingHours:"화~일 10:00~18:00",ageDescription:"만 3세~초등",priceDescription:"5,000원~8,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
+  {id:503,name:"정자동 공동육아나눔터",category:"shared_care",region:"경기",district:"성남시",address:"경기도 성남시 분당구 정자일로 95",lat:37.3600,lng:127.1142,phone:"031-729-8000",operatingHours:"월~금 09:00~17:00",ageDescription:"만 12세 이하",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
+
+  // === 경기 고양시 (일산) ===
+  {id:601,name:"일산 킨텍스 어린이 놀이공간",category:"public_kids_facility",region:"경기",district:"고양시",address:"경기도 고양시 일산서구 킨텍스로 217",lat:37.7099,lng:126.7351,phone:"031-995-8200",operatingHours:"행사 기간 운영",ageDescription:"전 연령",priceDescription:"무료~유료 (행사마다 다름)",availableToday:false,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
+  {id:602,name:"마두동 키즈카페 점프점프",category:"kids_cafe",region:"경기",district:"고양시",address:"경기도 고양시 일산동구 마두동 마두역로 21",lat:37.6593,lng:126.7701,phone:"031-911-2345",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~9세",priceDescription:"평일 1만원, 주말 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
+  {id:603,name:"고양시 육아종합지원센터",category:"childcare_support_center",region:"경기",district:"고양시",address:"경기도 고양시 덕양구 화중로 104",lat:37.6366,lng:126.8317,phone:"031-8075-8075",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
+
+  // === 경기 수원시 ===
+  {id:701,name:"수원 어린이 생태환경체험관",category:"experience_center",region:"경기",district:"수원시",address:"경기도 수원시 팔달구 창룡대로 21",lat:37.2671,lng:127.0286,phone:"031-228-3333",operatingHours:"화~일 09:00~18:00",ageDescription:"만 3세~초등",priceDescription:"무료",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:true},
+  {id:702,name:"영통 키즈카페 스플래시",category:"kids_cafe",region:"경기",district:"수원시",address:"경기도 수원시 영통구 영통로 197",lat:37.2756,lng:127.0477,phone:"031-202-7777",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"입장료 1.2만~1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
+  {id:703,name:"수원 시간제보육 어린이집",category:"hourly_care",region:"경기",district:"수원시",address:"경기도 수원시 권선구 권선로 685",lat:37.2558,lng:127.0130,phone:"031-298-5678",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
+
+  // === 경기 화성시 (동탄) ===
+  {id:801,name:"키즈파크 동탄점",category:"kids_cafe",region:"경기",district:"화성시",address:"경기도 화성시 동탄반석로 160",lat:37.209,lng:127.075,phone:"031-123-4567",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1만~1.5만원 (보호자 무료)",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
+  {id:802,name:"동탄 키즈카페 플레이그라운드",category:"kids_cafe",region:"경기",district:"화성시",address:"경기도 화성시 동탄반석로 120",lat:37.211,lng:127.077,phone:"031-234-5678",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:true,isFree:false},
+  {id:803,name:"동탄 아이체험관",category:"experience_center",region:"경기",district:"화성시",address:"경기도 화성시 동탄대로 537",lat:37.2145,lng:127.0812,phone:"031-345-6789",operatingHours:"화~일 09:30~18:30",ageDescription:"만 3세~10세",priceDescription:"프로그램당 1.5만~2.5만원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
+  {id:804,name:"화성시 동탄도서관 어린이실",category:"library_program",region:"경기",district:"화성시",address:"경기도 화성시 동탄문화로 40",lat:37.2078,lng:127.0698,phone:"031-456-7890",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
+  {id:805,name:"동탄 시간제보육 어린이집",category:"hourly_care",region:"경기",district:"화성시",address:"경기도 화성시 동탄순환대로 21길 14",lat:37.2055,lng:127.0822,phone:"031-567-8901",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원 (정부지원)",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:false,mealProvided:true,isFeatured:true,isFree:false},
+  {id:806,name:"동탄 공동육아나눔터",category:"shared_care",region:"경기",district:"화성시",address:"경기도 화성시 동탄대로 1039",lat:37.2032,lng:127.0765,phone:"031-678-9012",operatingHours:"월~금 09:00~17:00",ageDescription:"만 12세 이하",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
+  {id:807,name:"리틀아티스트 미술학원",category:"art_cooking_science",region:"경기",district:"화성시",address:"경기도 화성시 동탄반석로 55",lat:37.2118,lng:127.0735,phone:"031-789-0123",operatingHours:"토~일 10:00~17:00",ageDescription:"만 4세~초등 3학년",priceDescription:"1회 2만~3만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
+  {id:808,name:"화성시 육아종합지원센터 동탄",category:"childcare_support_center",region:"경기",district:"화성시",address:"경기도 화성시 동탄대로 1077",lat:37.2025,lng:127.0712,phone:"031-012-3456",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료 (일부 소정 비용)",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
+
+  // === 경기 용인시 ===
+  {id:901,name:"에버랜드 키즈월드",category:"public_kids_facility",region:"경기",district:"용인시",address:"경기도 용인시 처인구 포곡읍 에버랜드로 199",lat:37.2932,lng:127.2025,phone:"031-320-5000",operatingHours:"매일 10:00~18:00 (계절별 상이)",ageDescription:"전 연령",priceDescription:"입장권 별도",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:true,isFeatured:true,isFree:false},
+  {id:902,name:"수지구 키즈카페 점핑존",category:"kids_cafe",region:"경기",district:"용인시",address:"경기도 용인시 수지구 풍덕천로 126",lat:37.3231,lng:127.0963,phone:"031-888-9999",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~9세",priceDescription:"1만~1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
+
+  // === 인천 연수구 ===
+  {id:1001,name:"송도 어린이과학관",category:"experience_center",region:"인천",district:"연수구",address:"인천 연수구 센트럴로 263",lat:37.3795,lng:126.6561,phone:"032-850-6000",operatingHours:"화~일 09:30~17:30",ageDescription:"만 3세~중학생",priceDescription:"3,000원~5,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
+  {id:1002,name:"송도 키즈카페 오션파크",category:"kids_cafe",region:"인천",district:"연수구",address:"인천 연수구 컨벤시아대로 165",lat:37.3855,lng:126.6578,phone:"032-210-1234",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~12세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
+  {id:1003,name:"연수구 육아종합지원센터",category:"childcare_support_center",region:"인천",district:"연수구",address:"인천 연수구 인주대로 141",lat:37.3684,lng:126.6455,phone:"032-899-7700",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
+
+  // === 인천 부평구 ===
+  {id:1101,name:"부평 어린이 도서관",category:"library_program",region:"인천",district:"부평구",address:"인천 부평구 부평대로 168",lat:37.4908,lng:126.7224,phone:"032-509-8400",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
+  {id:1102,name:"부평 키즈카페 판타지아",category:"kids_cafe",region:"인천",district:"부평구",address:"인천 부평구 경인로 537",lat:37.5066,lng:126.7220,phone:"032-508-3333",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~10세",priceDescription:"평일 1만원, 주말 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
 ];
 
 const CAT_LABELS={kids_cafe:'키즈카페',experience_center:'체험센터',one_day_class:'원데이클래스',art_cooking_science:'미술·쿠킹',vacation_class:'방학특강',hourly_care:'시간제보육',shared_care:'공동육아나눔터',public_kids_facility:'공공시설',library_program:'도서관',childcare_support_center:'육아지원센터'};
 const CAT_COLORS={kids_cafe:'#f97316',experience_center:'#059669',one_day_class:'#d97706',art_cooking_science:'#7c3aed',vacation_class:'#0284c7',hourly_care:'#16a34a',shared_care:'#db2777',public_kids_facility:'#0891b2',library_program:'#4f46e5',childcare_support_center:'#be185d'};
 const CAT_BG={kids_cafe:'#fff7ed',experience_center:'#f0fdf4',one_day_class:'#fef3c7',art_cooking_science:'#f5f3ff',vacation_class:'#eff6ff',hourly_care:'#f0fdf4',shared_care:'#fdf2f8',public_kids_facility:'#ecfeff',library_program:'#eef2ff',childcare_support_center:'#fdf2f8'};
 const CAT_EMOJI={kids_cafe:'🎪',experience_center:'🔬',one_day_class:'🎨',art_cooking_science:'🖌️',vacation_class:'📚',hourly_care:'🏠',shared_care:'👨‍👩‍👧',public_kids_facility:'🏛️',library_program:'📖',childcare_support_center:'💝'};
-const FREE_IDS=[4,5,6,10,18];
 
-let filters={today:false,weekend:false,guardian:false,parking:false,free:false,meal:false,category:''};
+const REGION_DISTRICTS={
+  '서울':['강남구','마포구','송파구','노원구'],
+  '경기':['성남시','고양시','수원시','화성시','용인시'],
+  '인천':['연수구','부평구']
+};
+
+let filters={today:false,weekend:false,guardian:false,parking:false,free:false,meal:false,category:'',region:'',district:''};
 let selectedId=null;
 let viewMode='split';
 let filteredPlaces=[];
 let mobileShowMap=false;
+
+function selectRegion(r){
+  filters.region=r;
+  filters.district='';
+  // update region chips
+  ['all','seoul','gyeonggi','incheon'].forEach(k=>{
+    const el=document.getElementById('rgn-'+k);
+    if(el) el.className='region-chip';
+  });
+  const map={'':'all','서울':'seoul','경기':'gyeonggi','인천':'incheon'};
+  const el=document.getElementById('rgn-'+(map[r]||'all'));
+  if(el) el.className='region-chip active';
+
+  // show/hide district bar
+  const dbar=document.getElementById('district-bar');
+  if(r && REGION_DISTRICTS[r]){
+    const districts=REGION_DISTRICTS[r];
+    dbar.innerHTML='<span style="font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;margin-right:4px;flex-shrink:0">🏙️ 구/시</span>'+
+      '<button class="district-chip active" onclick="selectDistrict(\'\')">전체</button>'+
+      districts.map(d=>`<button class="district-chip" onclick="selectDistrict('${d}')">${d}</button>`).join('');
+    dbar.style.display='flex';
+  } else {
+    dbar.style.display='none';
+  }
+
+  updateRegionBadge();
+  render();
+}
+
+function selectDistrict(d){
+  filters.district=d;
+  document.querySelectorAll('.district-chip').forEach(el=>el.className='district-chip');
+  const all=document.querySelectorAll('.district-chip');
+  all.forEach(el=>{
+    if(el.textContent===(d||'전체')) el.className='district-chip active';
+  });
+  updateRegionBadge();
+  render();
+}
+
+function updateRegionBadge(){
+  const badge=document.getElementById('region-badge');
+  if(filters.region){
+    let txt=filters.region;
+    if(filters.district) txt+=' '+filters.district;
+    badge.textContent='📍 '+txt;
+    badge.style.display='inline-flex';
+  } else {
+    badge.style.display='none';
+  }
+}
 
 function toggleQuick(key){
   filters[key]=!filters[key];
@@ -235,7 +381,6 @@ function toggleMobileView(){
   mobileShowMap=!mobileShowMap;
   const mp=document.getElementById('map-panel');
   const lp=document.getElementById('list-panel');
-  const fab=document.getElementById('mobile-fab');
   if(mobileShowMap){
     mp.style.display='flex';mp.style.flex='1';lp.style.display='none';
     document.getElementById('fab-icon').textContent='📋';
@@ -250,12 +395,14 @@ function toggleMobileView(){
 
 function applyFilters(){
   return PLACES.filter(p=>{
+    if(filters.region && p.region!==filters.region) return false;
+    if(filters.district && p.district!==filters.district) return false;
     if(filters.category&&p.category!==filters.category)return false;
     if(filters.today&&!p.availableToday)return false;
     if(filters.weekend&&!p.availableWeekend)return false;
     if(filters.guardian&&p.guardianRequired!==false)return false;
     if(filters.parking&&!p.parkingAvailable)return false;
-    if(filters.free&&!FREE_IDS.includes(p.id))return false;
+    if(filters.free&&!p.isFree)return false;
     if(filters.meal&&!p.mealProvided)return false;
     return true;
   });
@@ -280,7 +427,7 @@ function renderList(){
     inner.innerHTML=`<div class="no-results" style="grid-column:1/-1">
       <div class="no-results-icon">🔍</div>
       <p style="font-weight:600;color:var(--text2)">조건에 맞는 장소가 없어요</p>
-      <p style="font-size:11px;color:var(--text3);margin-top:4px">필터를 조정해 보세요</p>
+      <p style="font-size:11px;color:var(--text3);margin-top:4px">지역이나 필터를 조정해 보세요</p>
       <button class="reset-btn" onclick="resetFilters()">필터 초기화</button>
     </div>`;return;
   }
@@ -309,6 +456,7 @@ function renderList(){
       </div>
       ${p.priceDescription?`<div class="price">${p.priceDescription}</div>`:''}
       <div class="card-footer">
+        <span class="region-tag">${p.region} ${p.district}</span>
         ${p.parkingAvailable?'<span class="footer-tag">🚗 주차</span>':''}
         ${p.mealProvided?'<span class="footer-tag">🍱 식사</span>':''}
         ${!p.guardianRequired?'<span class="footer-tag orange">보호자 비동반</span>':''}
@@ -321,31 +469,46 @@ function renderList(){
 function renderMap(){
   const svg=document.getElementById('map-svg');
   const mp=document.getElementById('map-panel');
-  if(mp.style.display==='none')return;
-  const vw=600,vh=420,pad=36;
-  const allLats=PLACES.map(p=>p.lat),allLngs=PLACES.map(p=>p.lng);
-  const minLat=Math.min(...allLats)-0.002,maxLat=Math.max(...allLats)+0.002;
-  const minLng=Math.min(...allLngs)-0.002,maxLng=Math.max(...allLngs)+0.002;
+  const welcome=document.getElementById('map-welcome');
+  if(!mp || mp.style.display==='none') return;
+
+  if(filteredPlaces.length===0 || (!filters.region && !filters.district)){
+    // Show welcome / no-region state with overview dots
+    welcome.style.display='flex';
+    renderOverviewMap(svg);
+    return;
+  }
+  welcome.style.display='none';
+
+  const vw=600,vh=420,pad=40;
+  const lats=filteredPlaces.map(p=>p.lat);
+  const lngs=filteredPlaces.map(p=>p.lng);
+  const minLat=Math.min(...lats)-0.005,maxLat=Math.max(...lats)+0.005;
+  const minLng=Math.min(...lngs)-0.005,maxLng=Math.max(...lngs)+0.005;
   const toX=lng=>pad+(lng-minLng)/(maxLng-minLng)*(vw-pad*2);
   const toY=lat=>vh-pad-(lat-minLat)/(maxLat-minLat)*(vh-pad*2);
   const filteredIds=new Set(filteredPlaces.map(p=>p.id));
+  const allVisible=PLACES.filter(p=>!filters.region||p.region===filters.region).filter(p=>!filters.district||p.district===filters.district);
 
   let html=`<rect width="${vw}" height="${vh}" fill="#dde8d8"/>`;
-  const roads=[[37.210,null],[37.205,null],[37.213,null],[null,127.075],[null,127.082],[null,127.070]];
-  roads.forEach(([lat,lng])=>{
-    if(lat){html+=`<line x1="0" y1="${toY(lat)}" x2="${vw}" y2="${toY(lat)}" stroke="#fff" stroke-width="6" opacity="0.65"/>`;}
-    else{html+=`<line x1="${toX(lng)}" y1="0" x2="${toX(lng)}" y2="${vh}" stroke="#fff" stroke-width="6" opacity="0.65"/>`;}
-  });
-  html+=`<text x="${toX(127.0685)}" y="${toY(37.2115)}" font-size="8" fill="#6b7280" font-family="Noto Sans KR,sans-serif" opacity="0.9">동탄반석로</text>`;
-  html+=`<text x="${toX(127.0695)}" y="${toY(37.2055)}" font-size="8" fill="#6b7280" font-family="Noto Sans KR,sans-serif" opacity="0.9">동탄대로</text>`;
+  // grid lines as roads
+  const latRange=maxLat-minLat, lngRange=maxLng-minLng;
+  for(let i=1;i<4;i++){
+    const y=toY(minLat+latRange*i/4);
+    html+=`<line x1="0" y1="${y}" x2="${vw}" y2="${y}" stroke="#fff" stroke-width="5" opacity="0.5"/>`;
+  }
+  for(let i=1;i<4;i++){
+    const x=toX(minLng+lngRange*i/4);
+    html+=`<line x1="${x}" y1="0" x2="${x}" y2="${vh}" stroke="#fff" stroke-width="5" opacity="0.5"/>`;
+  }
 
-  PLACES.forEach(p=>{
+  allVisible.forEach(p=>{
     const x=toX(p.lng),y=toY(p.lat);
     const inFilter=filteredIds.has(p.id);
     const color=p.availableToday?'#f97316':'#94a3b8';
     const r=p.isFeatured?12:10;
     const sel=p.id===selectedId;
-    const op=inFilter?1:0.25;
+    const op=inFilter?1:0.2;
     html+=`<g class="map-pin" onclick="selectPlace(${p.id})" onmouseenter="showTooltip(event,${p.id})" onmouseleave="hideTooltip()" style="opacity:${op}">
       ${sel?`<circle cx="${x}" cy="${y}" r="${r+6}" fill="${color}" opacity="0.2"/>`:''} 
       ${p.isFeatured?`<circle cx="${x}" cy="${y}" r="${r+2}" fill="#eab308" opacity="0.55"/>`:''} 
@@ -353,6 +516,36 @@ function renderMap(){
       <text x="${x}" y="${y}" font-size="8" fill="#fff" font-weight="600" text-anchor="middle" dominant-baseline="middle" style="pointer-events:none">${CAT_EMOJI[p.category]||'📍'}</text>
     </g>`;
   });
+  svg.setAttribute('viewBox',`0 0 ${vw} ${vh}`);
+  svg.innerHTML=html;
+}
+
+function renderOverviewMap(svg){
+  // Show all regions as overview
+  const vw=600,vh=420,pad=30;
+  const allLats=PLACES.map(p=>p.lat);
+  const allLngs=PLACES.map(p=>p.lng);
+  const minLat=Math.min(...allLats)-0.03,maxLat=Math.max(...allLats)+0.03;
+  const minLng=Math.min(...allLngs)-0.03,maxLng=Math.max(...allLngs)+0.03;
+  const toX=lng=>pad+(lng-minLng)/(maxLng-minLng)*(vw-pad*2);
+  const toY=lat=>vh-pad-(lat-minLat)/(maxLat-minLat)*(vh-pad*2);
+
+  let html=`<rect width="${vw}" height="${vh}" fill="#dde8d8"/>`;
+  // Region clusters
+  const regionCenters={'서울':{lat:37.53,lng:126.99},'경기':{lat:37.35,lng:127.05},'인천':{lat:37.45,lng:126.70}};
+  Object.entries(regionCenters).forEach(([r,c])=>{
+    const x=toX(c.lng),y=toY(c.lat);
+    const cnt=PLACES.filter(p=>p.region===r).length;
+    html+=`<circle cx="${x}" cy="${y}" r="28" fill="#f97316" opacity="0.15" stroke="#f97316" stroke-width="1.5"/>`;
+    html+=`<text x="${x}" y="${y-6}" font-size="13" font-weight="700" fill="#c2410c" text-anchor="middle" font-family="Noto Sans KR,sans-serif">${r}</text>`;
+    html+=`<text x="${x}" y="${y+9}" font-size="10" fill="#9a3412" text-anchor="middle" font-family="Noto Sans KR,sans-serif">${cnt}개 장소</text>`;
+  });
+  // small dots for all places
+  PLACES.forEach(p=>{
+    const x=toX(p.lng),y=toY(p.lat);
+    html+=`<circle cx="${x}" cy="${y}" r="4" fill="${p.availableToday?'#f97316':'#94a3b8'}" opacity="0.6" stroke="#fff" stroke-width="1"/>`;
+  });
+  svg.setAttribute('viewBox',`0 0 ${vw} ${vh}`);
   svg.innerHTML=html;
 }
 
@@ -360,7 +553,7 @@ function showTooltip(e,id){
   const p=PLACES.find(x=>x.id===id);if(!p)return;
   const tt=document.getElementById('map-tooltip');
   tt.innerHTML=`<div class="tt-name">${p.name}</div>
-    <div class="tt-cat">${CAT_EMOJI[p.category]||''} ${CAT_LABELS[p.category]||p.category}</div>
+    <div class="tt-cat">${CAT_EMOJI[p.category]||''} ${CAT_LABELS[p.category]||p.category} · ${p.region} ${p.district}</div>
     ${p.availableToday?'<div class="tt-avail">✓ 오늘 이용 가능</div>':''}
     ${p.priceDescription?`<div class="tt-price">${p.priceDescription}</div>`:''}`;
   const rect=document.getElementById('map-panel').getBoundingClientRect();
@@ -383,8 +576,9 @@ function selectPlace(id){
 }
 
 function resetFilters(){
-  filters={today:false,weekend:false,guardian:false,parking:false,free:false,meal:false,category:''};
+  filters={today:false,weekend:false,guardian:false,parking:false,free:false,meal:false,category:'',region:'',district:''};
   ['today','weekend','guardian','parking','free','meal'].forEach(k=>document.getElementById('chip-'+k).className='chip');
+  selectRegion('');
   renderCatBar();render();
 }
 
