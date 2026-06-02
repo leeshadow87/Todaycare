@@ -200,7 +200,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="logo-icon">🗺️</div>
     <div class="logo-text">
       <h1>오늘아이돌봄</h1>
-      <span class="logo-sub">수도권 키즈 공간 지도 v5</span>
+      <span class="logo-sub">수도권 키즈 공간 지도</span>
     </div>
   </div>
   <div class="header-actions">
@@ -468,13 +468,14 @@ async function searchAllCategories(regionQuery){
   if(isSearching) return;
   const cacheKey=getCacheKey(filters.region,filters.district,filters.category);
 
-  // ✅ 캐시 히트 → API 호출 없이 즉시 표시
+  // ✅ 캐시 히트
   const cached=getCache(cacheKey);
   if(cached){
     places=cached;
     setStatus('cached',`⚡ 캐시에서 로드 (${places.length}개)`);
     document.getElementById('cache-badge').style.display='inline-flex';
     document.getElementById('count-num').textContent=places.length;
+    document.getElementById('map-count').textContent=places.length;
     renderList();renderKakaoMarkers();recenterMap();
     return;
   }
@@ -486,10 +487,13 @@ async function searchAllCategories(regionQuery){
 
   const cats=filters.category?[filters.category]:Object.keys(CAT_KEYWORDS);
   let done=0;
+
   for(const cat of cats){
     for(const kw of CAT_KEYWORDS[cat]){
-      await searchByKeyword(`${regionQuery} ${kw}`,cat,1);
-      await searchByKeyword(`${regionQuery} ${kw}`,cat,2);
+      const query=`${regionQuery} ${kw}`;
+      for(let page=1;page<=3;page++){
+        await searchByKeyword(query,cat,page);
+      }
     }
     done++;
     setProgress(Math.round(done/cats.length*100));
@@ -513,20 +517,25 @@ async function searchAllCategories(regionQuery){
 function searchByKeyword(query,cat,page){
   return new Promise(resolve=>{
     const opts={size:15,page};
-    if(filters.region){
-      const rc={'서울':{lat:37.5665,lng:126.9780},'경기':{lat:37.4138,lng:127.5183},'인천':{lat:37.4563,lng:126.7052}}[filters.region];
-      if(rc){opts.location=new kakao.maps.LatLng(rc.lat,rc.lng);opts.radius=filters.district?8000:40000;opts.sort=kakao.maps.services.SortBy.DISTANCE;}
-    }
     searchPs.keywordSearch(query,(data,status)=>{
       if(status===kakao.maps.services.Status.OK){
         data.forEach(item=>{
+          const region=detectRegion(item.address_name);
+          // 수도권 외 제외
+          if(filters.region&&region!==filters.region) return;
+          if(!['서울','경기','인천'].includes(region)) return;
+          // 구/시 필터
+          if(filters.district){
+            const dist=detectDistrict(item.address_name);
+            if(dist!==filters.district) return;
+          }
           places.push({
             id:item.id,name:item.place_name,
             category:detectCategory(item.category_name,item.place_name,cat),
             address:item.road_address_name||item.address_name,
             lat:parseFloat(item.y),lng:parseFloat(item.x),
             phone:item.phone,kakaoUrl:item.place_url,
-            region:detectRegion(item.address_name),
+            region:region,
             district:detectDistrict(item.address_name),
           });
         });
