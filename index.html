@@ -101,8 +101,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .card-action-btn.primary:hover{background:var(--brand-dark)}
 
 /* DETAIL PANEL */
-.detail-panel{position:absolute;left:380px;top:0;width:360px;height:100%;background:#fff;border-right:1px solid var(--border);z-index:50;transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 20px rgba(0,0,0,0.08)}
-.detail-panel.open{transform:translateX(0)}
+.detail-panel{position:absolute;left:380px;top:0;width:360px;height:100%;background:#fff;border-right:1px solid var(--border);z-index:50;transform:translateX(-760px);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 20px rgba(0,0,0,0.08)}
+.detail-panel.open{transform:translateX(0) !important}
 .detail-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:10}
 .detail-title{font-size:15px;font-weight:800;color:var(--text)}
 .btn-close{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2);transition:all 0.15s}
@@ -130,8 +130,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .detail-action-btn.primary:hover{background:var(--brand-dark)}
 
 /* MAP */
-.map-panel{flex:1;position:relative}
-#kakao-map{width:100%;height:100%}
+.map-panel{flex:1;position:relative;height:100%;overflow:hidden}
+#kakao-map{width:100%;height:100%;min-height:400px}
 .map-controls{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;flex-wrap:wrap;justify-content:flex-end}
 .map-ctrl-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.12);font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:4px}
 .map-ctrl-btn:hover{background:var(--brand);color:#fff}
@@ -1123,6 +1123,7 @@ if(window.innerWidth<640){
 }
 
 initPublicData();
+applyFiltersLocal();
 document.getElementById('status-text').textContent = `${allPlaces.length.toLocaleString()}개 공공 장소 로드됨`;
 
 if(typeof kakao!=='undefined'&&kakao.maps){
