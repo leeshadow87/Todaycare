@@ -3,369 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>오늘아이돌봄 v3 - 수도권 키즈 공간 지도</title>
+<title>오늘아이돌봄 - 수도권 키즈 공간 지도</title>
+<meta name="description" content="수도권 육아 시설 지도 서비스. 키즈카페, 어린이도서관, 육아지원센터 등 실제 업체 정보를 카카오맵으로 제공합니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- 
-  ═══════════════════════════════════════════════════════
-  🗺️ 카카오맵 API 키 설정 방법 (무료)
-  ═══════════════════════════════════════════════════════
-  1. https://developers.kakao.com 에서 무료 가입
-  2. [내 애플리케이션] → [애플리케이션 추가하기]
-  3. 앱 이름 입력 후 생성
-  4. [앱 키] 탭 → JavaScript 키 복사
-  5. 아래 script src의 appkey=64378d75cc0d8edba55553350f36c7d1 부분에 붙여넣기
-  6. [플랫폼] → [Web] → 사이트 도메인 추가 (로컬: http://localhost 또는 파일 도메인)
-  ─────────────────────────────────────────────────────
-  무료 사용량: 일 300,000 호출 (개인 프로젝트 충분)
-  ═══════════════════════════════════════════════════════
--->
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=64378d75cc0d8edba55553350f36c7d1&libraries=services,clusterer"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --brand:#f97316;--brand-light:#fff7ed;--brand-dark:#c2410c;--brand-soft:#fed7aa;
-  --green:#16a34a;--green-light:#f0fdf4;
-  --blue:#2563eb;--blue-light:#eff6ff;
-  --purple:#7c3aed;--purple-light:#f5f3ff;
+  --green:#16a34a;--blue:#2563eb;--purple:#7c3aed;
   --bg:#f9fafb;--card:#fff;--border:#e5e7eb;--border2:#f3f4f6;
   --text:#111827;--text2:#6b7280;--text3:#9ca3af;--text4:#d1d5db;
-  --radius:14px;--radius-sm:9px;--radius-xs:6px;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
-  --shadow:0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg:0 8px 32px rgba(0,0,0,0.12);
-  --shadow-brand:0 4px 20px rgba(249,115,22,0.25);
+  --radius:14px;--shadow-sm:0 1px 3px rgba(0,0,0,0.06);
+  --shadow:0 4px 16px rgba(0,0,0,0.08);--shadow-brand:0 4px 20px rgba(249,115,22,0.25);
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
-/* ── HEADER ── */
-.header{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:10px 18px;display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;z-index:100;box-shadow:var(--shadow-sm);
-}
+/* HEADER */
+.header{background:#fff;border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:100;box-shadow:var(--shadow-sm)}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-icon{
-  width:38px;height:38px;
-  background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fdba74 100%);
-  border-radius:11px;display:flex;align-items:center;justify-content:center;
-  font-size:19px;box-shadow:0 2px 8px rgba(249,115,22,0.3);
-}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#f97316,#fb923c);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 2px 8px rgba(249,115,22,0.3)}
 .logo-text h1{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px}
 .logo-text .logo-sub{font-size:10.5px;color:var(--text3);font-weight:500}
 .header-actions{display:flex;align-items:center;gap:8px}
-.btn-sm{
-  padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;
-  cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text);
-  transition:all 0.18s;font-family:'Noto Sans KR',sans-serif;
-  display:inline-flex;align-items:center;gap:4px;
-}
+.btn-sm{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text);transition:all 0.18s;font-family:'Noto Sans KR',sans-serif;display:inline-flex;align-items:center;gap:4px}
 .btn-sm:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light)}
 .btn-primary{background:var(--brand);color:#fff;border-color:var(--brand);box-shadow:var(--shadow-brand)}
 .btn-primary:hover{background:var(--brand-dark);color:#fff;border-color:var(--brand-dark)}
-.api-key-badge{
-  font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;
-  background:#fef3c7;color:#92400e;border:1px solid #fde68a;cursor:pointer;
-  transition:all 0.15s;
-}
-.api-key-badge.ok{background:#f0fdf4;color:#166534;border-color:#bbf7d0}
-.api-key-badge:hover{opacity:0.8}
 
-/* ── BARS ── */
-.region-bar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:8px 18px;display:flex;gap:6px;overflow-x:auto;
-  flex-shrink:0;scrollbar-width:none;align-items:center;
-}
+/* 검색 바 */
+.search-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 18px;display:flex;gap:8px;flex-shrink:0;align-items:center}
+.search-input-wrap{flex:1;position:relative;max-width:400px}
+.search-input{width:100%;padding:8px 14px 8px 36px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color 0.18s;color:var(--text)}
+.search-input:focus{border-color:var(--brand)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)}
+.search-btn{padding:8px 16px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.18s;white-space:nowrap}
+.search-btn:hover{background:var(--brand-dark)}
+.search-status{font-size:11px;color:var(--text3);font-weight:500;white-space:nowrap}
+.search-status.loading{color:var(--brand)}
+.search-status.done{color:var(--green)}
+.search-status.cached{color:#0891b2}
+
+/* BARS */
+.region-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 18px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;align-items:center}
 .region-bar::-webkit-scrollbar{display:none}
-.bar-label{font-size:11px;font-weight:700;color:var(--text3);white-space:nowrap;margin-right:2px;flex-shrink:0;letter-spacing:0.3px}
-.region-chip{
-  padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;
-  cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);
-  transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif;
-}
+.bar-label{font-size:11px;font-weight:700;color:var(--text3);white-space:nowrap;margin-right:2px;flex-shrink:0}
+.region-chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif}
 .region-chip:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light)}
-.region-chip.active{background:var(--brand);color:#fff;border-color:var(--brand);box-shadow:0 2px 8px rgba(249,115,22,0.25)}
-
-.district-bar{
-  background:#fff8f4;border-bottom:1px solid #fde8d4;
-  padding:6px 18px;display:flex;gap:5px;overflow-x:auto;
-  flex-shrink:0;scrollbar-width:none;align-items:center;
-}
+.region-chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.district-bar{background:#fff8f4;border-bottom:1px solid #fde8d4;padding:6px 18px;display:flex;gap:5px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;align-items:center}
 .district-bar::-webkit-scrollbar{display:none}
-.district-chip{
-  padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;white-space:nowrap;
-  cursor:pointer;border:1px solid #fed7aa;background:#fff;color:var(--text2);
-  transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif;
-}
+.district-chip{padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;border:1px solid #fed7aa;background:#fff;color:var(--text2);transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif}
 .district-chip:hover{border-color:var(--brand);color:var(--brand)}
 .district-chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-
-.quick-bar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:7px 18px;display:flex;gap:6px;overflow-x:auto;
-  flex-shrink:0;scrollbar-width:none;
-}
-.quick-bar::-webkit-scrollbar{display:none}
-.chip{
-  padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;
-  cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);
-  transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif;
-}
-.chip:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light)}
-.chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-.chip.active-green{background:var(--green);color:#fff;border-color:var(--green)}
-.chip.active-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
-.chip.active-purple{background:var(--purple);color:#fff;border-color:var(--purple)}
-
-.cat-bar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:7px 18px;display:flex;gap:5px;overflow-x:auto;
-  flex-shrink:0;scrollbar-width:none;
-}
+.cat-bar{background:#fff;border-bottom:1px solid var(--border);padding:7px 18px;display:flex;gap:5px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
 .cat-bar::-webkit-scrollbar{display:none}
-.cat-btn{
-  padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;
-  cursor:pointer;border:1px solid var(--border);background:#f8f9fa;color:var(--text2);
-  transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif;
-}
+.cat-btn{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;border:1px solid var(--border);background:#f8f9fa;color:var(--text2);transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif}
 .cat-btn:hover{background:#fff;border-color:var(--brand);color:var(--brand)}
 .cat-btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-
-.view-bar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:7px 18px;display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;
-}
+.view-bar{background:#fff;border-bottom:1px solid var(--border);padding:7px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .count{font-size:12px;color:var(--text2);font-weight:500}
 .count span{color:var(--brand);font-weight:800}
-.region-badge{
-  display:inline-flex;align-items:center;gap:4px;background:var(--brand-light);
-  color:var(--brand);font-size:10.5px;font-weight:700;padding:2px 9px;
-  border-radius:10px;margin-left:6px;border:1px solid var(--brand-soft);
-}
+.region-badge{display:inline-flex;align-items:center;gap:4px;background:var(--brand-light);color:var(--brand);font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:10px;margin-left:6px;border:1px solid var(--brand-soft)}
+.cache-badge{display:inline-flex;align-items:center;gap:3px;background:#ecfeff;color:#0e7490;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:4px;cursor:pointer;border:1px solid #a5f3fc}
+.cache-badge:hover{background:#cffafe}
 .view-toggle{display:flex;gap:2px;background:#f3f4f6;border-radius:9px;padding:3px}
-.vbtn{
-  padding:4px 13px;border-radius:7px;font-size:11px;font-weight:600;
-  cursor:pointer;border:none;background:transparent;color:var(--text3);
-  transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif;
-}
+.vbtn{padding:4px 13px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:all 0.18s;user-select:none;font-family:'Noto Sans KR',sans-serif}
 .vbtn.active{background:#fff;color:var(--text);box-shadow:var(--shadow-sm)}
 
-/* ── MAIN LAYOUT ── */
+/* MAIN */
 .main{display:flex;flex:1;overflow:hidden;min-height:0}
-
-/* ── KAKAO MAP PANEL ── */
-.map-panel{flex:1;position:relative;overflow:hidden;background:#e8f4e8}
+.map-panel{flex:1;position:relative;overflow:hidden}
 #kakao-map{width:100%;height:100%}
-
-/* Map overlay UI */
-.map-overlay-btn{
-  position:absolute;background:#fff;border:1px solid var(--border);border-radius:9px;
-  padding:7px 13px;font-size:11.5px;font-weight:600;cursor:pointer;
-  box-shadow:var(--shadow);color:var(--text);font-family:'Noto Sans KR',sans-serif;
-  transition:all 0.18s;display:flex;align-items:center;gap:5px;z-index:10;
-}
+.map-overlay-btn{position:absolute;background:#fff;border:1px solid var(--border);border-radius:9px;padding:7px 13px;font-size:11.5px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);color:var(--text);font-family:'Noto Sans KR',sans-serif;transition:all 0.18s;display:flex;align-items:center;gap:5px;z-index:10}
 .map-overlay-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light)}
 .btn-recenter{top:12px;right:12px}
-.btn-cluster-toggle{top:12px;right:110px}
+.btn-cluster-toggle{top:12px;right:128px}
 .btn-cluster-toggle.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-
-.map-legend{
-  position:absolute;bottom:14px;left:14px;
-  background:rgba(255,255,255,0.95);border:1px solid var(--border);
-  border-radius:12px;padding:9px 13px;box-shadow:var(--shadow);backdrop-filter:blur(6px);z-index:10;
-}
-.map-legend-title{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;letter-spacing:0.5px;text-transform:uppercase}
+.map-stats{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.95);border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:11px;font-weight:600;color:var(--text2);box-shadow:var(--shadow);backdrop-filter:blur(6px);z-index:10}
+.map-stats strong{color:var(--brand);font-weight:800}
+.map-legend{position:absolute;bottom:40px;left:14px;background:rgba(255,255,255,0.95);border:1px solid var(--border);border-radius:12px;padding:9px 13px;box-shadow:var(--shadow);backdrop-filter:blur(6px);z-index:10}
+.map-legend-title{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;letter-spacing:0.5px}
 .legend-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:10.5px;color:var(--text2)}
 .legend-row:last-child{margin-bottom:0}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.8)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
-/* Map stats pill */
-.map-stats{
-  position:absolute;top:12px;left:12px;
-  background:rgba(255,255,255,0.95);border:1px solid var(--border);
-  border-radius:20px;padding:6px 13px;font-size:11px;font-weight:600;color:var(--text2);
-  box-shadow:var(--shadow);backdrop-filter:blur(6px);z-index:10;
-}
-.map-stats strong{color:var(--brand);font-weight:800}
+/* 면책 문구 바 */
+.disclaimer-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);border-top:1px solid var(--border);padding:4px 12px;font-size:10px;color:var(--text3);z-index:10;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px)}
+.disclaimer-bar a{color:var(--blue);text-decoration:none;font-weight:600}
+.disclaimer-bar a:hover{text-decoration:underline}
 
-/* Welcome overlay when no API key */
-.map-no-key{
-  position:absolute;inset:0;background:rgba(249,250,251,0.97);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:12px;text-align:center;padding:30px;z-index:50;
-}
-.map-no-key-icon{font-size:52px;margin-bottom:4px;animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.map-no-key h3{font-size:18px;font-weight:800;color:var(--text)}
-.map-no-key p{font-size:12.5px;color:var(--text2);max-width:280px;line-height:1.7}
-.map-no-key .steps{
-  background:#fff;border:1px solid var(--border);border-radius:12px;
-  padding:14px 18px;text-align:left;max-width:320px;font-size:12px;
-  box-shadow:var(--shadow-sm);
-}
-.map-no-key .steps ol{padding-left:16px;display:flex;flex-direction:column;gap:5px;color:var(--text2)}
-.map-no-key .steps li strong{color:var(--brand)}
-.map-no-key .steps a{color:var(--blue);text-decoration:none;font-weight:600}
-.map-no-key .steps a:hover{text-decoration:underline}
-.key-input-row{display:flex;gap:8px;max-width:320px;width:100%}
-.key-input{
-  flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;
-  font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;
-  transition:border-color 0.18s;color:var(--text);
-}
-.key-input:focus{border-color:var(--brand)}
-.key-apply-btn{
-  padding:8px 16px;background:var(--brand);color:#fff;border:none;border-radius:9px;
-  font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;
-  white-space:nowrap;transition:all 0.18s;
-}
-.key-apply-btn:hover{background:var(--brand-dark)}
+/* 로딩 */
+.map-loading{position:absolute;inset:0;background:rgba(249,250,251,0.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:50;backdrop-filter:blur(4px)}
+.loading-spinner{width:42px;height:42px;border:4px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;font-weight:600;color:var(--text2)}
+.loading-sub{font-size:11px;color:var(--text3)}
+.progress-bar-wrap{width:220px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-bar{height:100%;background:var(--brand);transition:width 0.3s;width:0%;border-radius:3px}
 
-/* ── LIST PANEL ── */
-.list-panel{
-  width:350px;flex-shrink:0;overflow-y:auto;border-left:1px solid var(--border);
-  background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border) transparent;
-}
+/* LIST */
+.list-panel{width:350px;flex-shrink:0;overflow-y:auto;border-left:1px solid var(--border);background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .list-panel::-webkit-scrollbar{width:4px}
 .list-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .list-inner{padding:10px;display:flex;flex-direction:column;gap:8px}
 
-/* ── PLACE CARD ── */
-.place-card{
-  background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);
-  padding:14px;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;
-}
-.place-card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:transparent;border-radius:3px 0 0 3px;transition:background 0.18s;
-}
+/* PLACE CARD */
+.place-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden}
+.place-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;border-radius:3px 0 0 3px;transition:background 0.18s}
 .place-card:hover{border-color:#fcd9be;box-shadow:0 4px 20px rgba(249,115,22,0.1);transform:translateY(-1px)}
 .place-card:hover::before{background:var(--brand-soft)}
 .place-card.selected{border-color:var(--brand);border-width:2px;box-shadow:0 4px 20px rgba(249,115,22,0.2)}
 .place-card.selected::before{background:var(--brand)}
-
 .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:7px}
 .card-name{font-size:13.5px;font-weight:700;color:var(--text);line-height:1.35;flex:1}
 .cat-badge{font-size:10px;padding:3px 9px;border-radius:10px;font-weight:700;white-space:nowrap;flex-shrink:0}
-.avail-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.avail-badge{font-size:10.5px;padding:2px 9px;border-radius:10px;font-weight:700}
-.avail-today{background:#dcfce7;color:#15803d}
-.avail-weekend{background:#ede9fe;color:#6d28d9}
-.avail-none{background:#f9fafb;color:var(--text3);border:1px solid var(--border2)}
 .card-info{display:flex;flex-direction:column;gap:3px;margin-bottom:7px}
 .info-row{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--text2)}
 .info-icon{width:13px;height:13px;flex-shrink:0;opacity:0.5;margin-top:1px}
 .info-text{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1}
-.price{font-size:12.5px;font-weight:800;color:var(--brand);margin-top:4px}
-.card-footer{
-  display:flex;align-items:center;gap:4px;margin-top:8px;padding-top:8px;
-  border-top:1px solid var(--border2);flex-wrap:wrap;
-}
+.card-footer{display:flex;align-items:center;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);flex-wrap:wrap}
 .footer-tag{font-size:10px;padding:2px 8px;border-radius:5px;background:#f3f4f6;color:var(--text2);font-weight:600}
-.footer-tag.orange{background:#fff7ed;color:var(--brand)}
-.footer-tag.green{background:#f0fdf4;color:var(--green)}
-.chevron{margin-left:auto;color:var(--text4);font-size:18px;line-height:1;flex-shrink:0}
 .region-tag{font-size:10px;padding:2px 8px;border-radius:5px;background:#eff6ff;color:#1d4ed8;font-weight:700}
-.featured-ribbon{
-  font-size:10px;color:#92400e;font-weight:700;margin-bottom:5px;
-  display:flex;align-items:center;gap:4px;
-}
+.card-map-btn{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:#eff6ff;color:#1d4ed8;cursor:pointer;border:none;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;margin-left:auto}
+.card-map-btn:hover{background:#dbeafe}
+.kakao-link{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:#fef3c7;color:#92400e;text-decoration:none;transition:all 0.15s}
+.kakao-link:hover{background:#fde68a}
+.data-notice{font-size:10px;color:var(--text4);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border2)}
 
-/* ── MAP ACTION BUTTON on card ── */
-.card-map-btn{
-  display:inline-flex;align-items:center;gap:3px;
-  font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;
-  background:#eff6ff;color:#1d4ed8;cursor:pointer;border:none;
-  font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;margin-left:auto;
-}
-.card-map-btn:hover{background:#dbeafe;color:#1e40af}
-
-/* ── NO RESULTS ── */
 .no-results{padding:40px 16px;text-align:center;color:var(--text2)}
 .no-results-icon{font-size:38px;margin-bottom:10px}
-.reset-btn{
-  margin-top:14px;padding:8px 18px;border-radius:9px;font-size:12px;font-weight:600;
-  cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);
-  transition:all 0.18s;font-family:'Noto Sans KR',sans-serif;
-}
+.reset-btn{margin-top:14px;padding:8px 18px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);transition:all 0.18s;font-family:'Noto Sans KR',sans-serif}
 .reset-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light)}
 
-/* ── KAKAO INFOWINDOW CUSTOM ── */
-.iw-wrap{
-  background:#fff;border:1.5px solid var(--brand);border-radius:12px;
-  padding:11px 14px;min-width:180px;max-width:240px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:'Noto Sans KR',sans-serif;
-  position:relative;
-}
-.iw-wrap::after{
-  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
-  border:5px solid transparent;border-top-color:var(--brand);
-}
-.iw-name{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:3px}
+/* 인포윈도우 */
+.iw-wrap{background:#fff;border:1.5px solid var(--brand);border-radius:12px;padding:11px 14px;min-width:200px;max-width:260px;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:'Noto Sans KR',sans-serif}
+.iw-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
 .iw-cat{font-size:10.5px;color:var(--text2);margin-bottom:4px}
-.iw-avail{font-size:10.5px;font-weight:700;color:#16a34a;margin-bottom:2px}
-.iw-price{font-size:11px;color:var(--brand);font-weight:700}
-.iw-close{
-  position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;
-  font-size:14px;color:var(--text3);line-height:1;padding:2px;
-  font-family:'Noto Sans KR',sans-serif;
-}
-.iw-close:hover{color:var(--text)}
+.iw-addr{font-size:10.5px;color:var(--text3);margin-bottom:3px}
+.iw-phone{font-size:10.5px;color:var(--blue);margin-bottom:4px}
+.iw-notice{font-size:9.5px;color:var(--text4);margin-top:5px;padding-top:5px;border-top:1px dashed var(--border)}
+.iw-link{display:inline-block;font-size:10.5px;font-weight:700;color:var(--brand);text-decoration:none;margin-top:2px}
+.iw-link:hover{text-decoration:underline}
 
-/* ── MOBILE FAB ── */
-.mobile-fab{
-  display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  background:var(--brand);color:#fff;border:none;padding:12px 24px;
-  border-radius:28px;font-size:13.5px;font-weight:700;cursor:pointer;
-  box-shadow:0 6px 20px rgba(249,115,22,0.45);z-index:200;
-  font-family:'Noto Sans KR',sans-serif;align-items:center;gap:7px;
-  transition:all 0.2s;
-}
-.mobile-fab:active{transform:translateX(-50%) scale(0.97)}
-
-/* ── KEY MODAL ── */
-.modal-backdrop{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;
-  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);
-}
+/* 모달 공통 */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
 .modal-backdrop.open{display:flex}
-.modal-box{
-  background:#fff;border-radius:18px;padding:28px;max-width:440px;width:100%;
-  box-shadow:0 20px 60px rgba(0,0,0,0.2);
-}
-.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:5px}
-.modal-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.6}
-.modal-steps{
-  background:var(--bg);border-radius:12px;padding:16px;margin-bottom:20px;
-  font-size:12px;color:var(--text2);line-height:1.9;
-}
-.modal-steps ol{padding-left:16px}
-.modal-steps a{color:var(--blue);font-weight:600;text-decoration:none}
-.modal-steps a:hover{text-decoration:underline}
-.modal-input-row{display:flex;gap:8px;margin-bottom:12px}
-.modal-input{
-  flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;
-  font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;color:var(--text);
-  transition:border-color 0.18s;
-}
-.modal-input:focus{border-color:var(--brand)}
-.modal-input::placeholder{color:var(--text4)}
-.modal-apply{
-  padding:10px 18px;background:var(--brand);color:#fff;border:none;border-radius:10px;
-  font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;
-  transition:all 0.18s;white-space:nowrap;
-}
-.modal-apply:hover{background:var(--brand-dark)}
-.modal-close{
-  width:100%;padding:10px;background:#f3f4f6;color:var(--text2);border:none;
-  border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
-  font-family:'Noto Sans KR',sans-serif;transition:all 0.18s;
-}
-.modal-close:hover{background:var(--border)}
+.modal-box{background:#fff;border-radius:18px;padding:28px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:80vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-body{font-size:12.5px;color:var(--text2);line-height:1.9}
+.modal-body h4{font-size:13px;font-weight:700;color:var(--text);margin-top:16px;margin-bottom:6px}
+.modal-body p{margin-bottom:8px}
+.modal-close-btn{width:100%;padding:11px;background:#f3f4f6;color:var(--text2);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-top:20px;transition:all 0.18s}
+.modal-close-btn:hover{background:var(--border)}
+
+/* 업체등록 모달 */
+.reg-form{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.reg-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:3px;display:block}
+.reg-input{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color 0.18s;color:var(--text)}
+.reg-input:focus{border-color:var(--brand)}
+.reg-notice{background:#fef3c7;border:1px solid #fde68a;border-radius:9px;padding:10px 13px;font-size:11.5px;color:#92400e;line-height:1.7}
+.reg-submit{padding:11px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.18s}
+.reg-submit:hover{background:var(--brand-dark)}
+.reg-agree{display:flex;align-items:flex-start;gap:8px;font-size:11.5px;color:var(--text2);line-height:1.6}
+.reg-agree input{margin-top:2px;flex-shrink:0;accent-color:var(--brand)}
+.reg-agree a{color:var(--blue);text-decoration:none;font-weight:600}
+
+/* 모바일 FAB */
+.mobile-fab{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;border:none;padding:12px 24px;border-radius:28px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(249,115,22,0.45);z-index:200;font-family:'Noto Sans KR',sans-serif;align-items:center;gap:7px;transition:all 0.2s}
+
+/* 하단 푸터 */
+.footer-links{background:#fff;border-top:1px solid var(--border);padding:6px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;font-size:10.5px;color:var(--text3)}
+.footer-links a{color:var(--text3);text-decoration:none;font-weight:500}
+.footer-links a:hover{color:var(--brand)}
+.footer-links span{color:var(--border)}
 
 @media(max-width:640px){
   .list-panel{width:100%}
@@ -373,29 +187,39 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   .map-panel.mobile-map{display:block}
   .list-panel.mobile-hidden{display:none}
   .mobile-fab{display:flex!important}
-  .header-actions .api-key-badge{display:none}
+  .footer-links{display:none}
 }
 </style>
 </head>
 <body>
 <div class="app" id="app">
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <div class="header">
   <div class="logo">
     <div class="logo-icon">🗺️</div>
     <div class="logo-text">
       <h1>오늘아이돌봄</h1>
-      <span class="logo-sub">수도권 키즈 공간 지도 v3</span>
+      <span class="logo-sub">수도권 키즈 공간 지도 v5</span>
     </div>
   </div>
   <div class="header-actions">
-    <span class="api-key-badge" id="api-status" onclick="openKeyModal()">🔑 API키 설정</span>
-    <button class="btn-sm btn-primary" onclick="alert('업체 등록 기능 준비 중입니다.')">+ 업체 등록</button>
+    <button class="btn-sm" onclick="openModal('privacy-modal')">개인정보처리방침</button>
+    <button class="btn-sm btn-primary" onclick="openModal('reg-modal')">+ 업체 등록</button>
   </div>
 </div>
 
-<!-- ── REGION BAR ── -->
+<!-- 검색 바 -->
+<div class="search-bar">
+  <div class="search-input-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="keyword-input" placeholder="업체명 또는 지역으로 검색..." onkeydown="if(event.key==='Enter')searchKeyword()"/>
+  </div>
+  <button class="search-btn" onclick="searchKeyword()">검색</button>
+  <span class="search-status" id="search-status">지역을 선택하면 자동 검색됩니다</span>
+</div>
+
+<!-- REGION BAR -->
 <div class="region-bar">
   <span class="bar-label">📍 지역</span>
   <button class="region-chip active" id="rgn-all" onclick="selectRegion('')">전체</button>
@@ -403,26 +227,16 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <button class="region-chip" id="rgn-gyeonggi" onclick="selectRegion('경기')">경기</button>
   <button class="region-chip" id="rgn-incheon" onclick="selectRegion('인천')">인천</button>
 </div>
-
-<!-- ── DISTRICT BAR ── -->
 <div class="district-bar" id="district-bar" style="display:none"></div>
-
-<!-- ── QUICK FILTER BAR ── -->
-<div class="quick-bar">
-  <button class="chip" id="chip-today" onclick="toggleQuick('today')">✅ 오늘 가능</button>
-  <button class="chip" id="chip-weekend" onclick="toggleQuick('weekend')">📅 주말 가능</button>
-  <button class="chip" id="chip-guardian" onclick="toggleQuick('guardian')">👤 보호자 비동반</button>
-  <button class="chip" id="chip-parking" onclick="toggleQuick('parking')">🚗 주차 가능</button>
-  <button class="chip" id="chip-free" onclick="toggleQuick('free')">🏛️ 무료시설</button>
-  <button class="chip" id="chip-meal" onclick="toggleQuick('meal')">🍱 식사 제공</button>
-</div>
-
-<!-- ── CATEGORY BAR ── -->
 <div class="cat-bar" id="cat-bar"></div>
 
-<!-- ── VIEW BAR ── -->
+<!-- VIEW BAR -->
 <div class="view-bar">
-  <div class="count">총 <span id="count-num">0</span>개 장소<span class="region-badge" id="region-badge" style="display:none"></span></div>
+  <div class="count">
+    총 <span id="count-num">0</span>개 장소
+    <span class="region-badge" id="region-badge" style="display:none"></span>
+    <span class="cache-badge" id="cache-badge" style="display:none" onclick="clearCache()" title="캐시 삭제 클릭">⚡ 캐시됨 ✕</span>
+  </div>
   <div class="view-toggle">
     <button class="vbtn active" id="vbtn-split" onclick="setView('split')">분할</button>
     <button class="vbtn" id="vbtn-map" onclick="setView('map')">지도</button>
@@ -430,600 +244,518 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- ── MAIN AREA ── -->
+<!-- MAIN -->
 <div class="main" id="main-area">
-  <!-- KAKAO MAP PANEL -->
   <div class="map-panel" id="map-panel">
     <div id="kakao-map"></div>
-
-    <!-- Map overlay buttons -->
-    <button class="map-overlay-btn btn-recenter" onclick="recenterMap()">🎯 현재 필터 중심</button>
-    <button class="map-overlay-btn btn-cluster-toggle" id="cluster-btn" onclick="toggleClustering()">🔵 클러스터 ON</button>
-
-    <!-- Stats pill -->
-    <div class="map-stats" id="map-stats"><strong id="map-count">0</strong>개 표시 중</div>
-
-    <!-- Legend -->
+    <button class="map-overlay-btn btn-recenter" onclick="recenterMap()">🎯 결과 중심</button>
+    <button class="map-overlay-btn btn-cluster-toggle active" id="cluster-btn" onclick="toggleClustering()">🔵 클러스터 ON</button>
+    <div class="map-stats"><strong id="map-count">0</strong>개 표시 중</div>
     <div class="map-legend">
       <div class="map-legend-title">범례</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div>오늘 이용 가능</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#94a3b8"></div>예약 문의</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#eab308"></div>⭐ 추천 장소</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div>키즈카페·체험</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#16a34a"></div>육아지원·보육</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#4f46e5"></div>도서관·교육</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#0891b2"></div>공공시설</div>
     </div>
-
-    <!-- No API key overlay -->
-    <div class="map-no-key" id="map-no-key">
-      <div class="map-no-key-icon">🗝️</div>
-      <h3>카카오맵 API 키가 필요해요</h3>
-      <p>무료 카카오 개발자 계정으로 실제 지도를 연동할 수 있어요.</p>
-      <div class="map-no-key steps">
-        <ol>
-          <li><a href="https://developers.kakao.com" target="_blank">developers.kakao.com</a> 무료 가입</li>
-          <li><strong>내 애플리케이션</strong> → 애플리케이션 추가하기</li>
-          <li><strong>앱 키</strong> 탭 → JavaScript 키 복사</li>
-          <li><strong>플랫폼 → Web → 도메인 등록</strong></li>
-        </ol>
-      </div>
-      <div class="key-input-row">
-        <input class="key-input" id="quick-key-input" placeholder="JavaScript 앱 키 입력..." />
-        <button class="key-apply-btn" onclick="applyKeyFromInput()">적용</button>
-      </div>
+    <!-- 면책 문구 -->
+    <div class="disclaimer-bar">
+      <span>📌 장소 정보 제공: 카카오맵 | 실제 운영 여부·시간은 업체에 직접 확인하세요</span>
+      <a href="javascript:void(0)" onclick="openModal('privacy-modal')">이용약관·개인정보처리방침</a>
+    </div>
+    <!-- 로딩 -->
+    <div class="map-loading" id="map-loading" style="display:none">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="loading-text">실제 업체 검색 중...</div>
+      <div class="loading-sub" id="loading-sub">카카오맵에서 육아 시설을 찾고 있어요</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
     </div>
   </div>
 
-  <!-- LIST PANEL -->
   <div class="list-panel" id="list-panel">
-    <div class="list-inner" id="list-inner"></div>
+    <div class="list-inner" id="list-inner">
+      <div class="no-results">
+        <div class="no-results-icon">🗺️</div>
+        <p style="font-weight:700;color:var(--text)">지역을 선택해주세요</p>
+        <p style="font-size:11px;color:var(--text3);margin-top:4px">지역 선택 시 실제 업체를 자동으로 검색해요</p>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Mobile FAB -->
+<!-- 하단 푸터 -->
+<div class="footer-links">
+  <span>© 2025 오늘아이돌봄</span>
+  <span>|</span>
+  <a href="javascript:void(0)" onclick="openModal('privacy-modal')">개인정보처리방침</a>
+  <span>|</span>
+  <a href="javascript:void(0)" onclick="openModal('terms-modal')">이용약관</a>
+  <span>|</span>
+  <span>장소 정보 제공: 카카오맵</span>
+  <span>|</span>
+  <span>문의: contact@todaycare.kr</span>
+</div>
+
 <button class="mobile-fab" id="mobile-fab" onclick="toggleMobileView()">
   <span id="fab-icon">🗺️</span>
   <span id="fab-text">지도 보기</span>
 </button>
 
-<!-- ── API KEY MODAL ── -->
-<div class="modal-backdrop" id="key-modal">
+<!-- ══════════════════════════════ -->
+<!-- 개인정보처리방침 + 이용약관 모달 -->
+<!-- ══════════════════════════════ -->
+<div class="modal-backdrop" id="privacy-modal">
   <div class="modal-box">
-    <div class="modal-title">🔑 카카오맵 API 키 설정</div>
-    <div class="modal-sub">무료 카카오 개발자 계정으로 실제 지도를 바로 사용할 수 있어요.<br>설정은 이 브라우저에 저장됩니다.</div>
-    <div class="modal-steps">
-      <ol>
-        <li><a href="https://developers.kakao.com" target="_blank">developers.kakao.com</a> 접속 → 무료 가입</li>
-        <li><strong>내 애플리케이션</strong> → <strong>애플리케이션 추가하기</strong></li>
-        <li>앱 이름 입력 후 생성 → <strong>앱 키</strong> 탭 → <strong>JavaScript 키</strong> 복사</li>
-        <li><strong>플랫폼</strong> → <strong>Web 플랫폼 등록</strong> → 사이트 도메인 추가<br>(로컬 테스트: <code>http://localhost</code>)</li>
-      </ol>
+    <div class="modal-title">🔒 개인정보처리방침 및 이용약관</div>
+    <div class="modal-body">
+      <h4>제1조 개인정보 수집 및 이용</h4>
+      <p>오늘아이돌봄(이하 "서비스")은 현재 회원가입 없이 운영되며, 별도의 개인정보를 수집하지 않습니다. 단, 업체 등록 신청 시 입력된 사업자 정보 및 연락처는 서비스 검토 목적으로만 사용되며, 검토 후 즉시 파기됩니다.</p>
+
+      <h4>제2조 장소 정보의 출처 및 정확성</h4>
+      <p>본 서비스에 표시되는 장소 정보(업체명, 주소, 전화번호, 위치)는 <strong>카카오맵 Places API</strong>를 통해 실시간으로 제공됩니다. 해당 데이터는 카카오의 서비스 약관에 따라 제공되며, 본 서비스는 데이터의 정확성·완전성·최신성을 보장하지 않습니다.</p>
+      <p>⚠️ 실제 운영 여부, 영업시간, 휴업 여부는 반드시 해당 업체에 직접 확인하시기 바랍니다.</p>
+
+      <h4>제3조 카카오맵 API 이용</h4>
+      <p>본 서비스는 카카오 JavaScript Map API 및 Places API를 이용합니다. 검색 결과 데이터는 카카오 이용약관에 따라 실시간 표시 목적으로만 활용되며, 별도 저장·재배포하지 않습니다.</p>
+
+      <h4>제4조 서비스 이용약관</h4>
+      <p>① 본 서비스는 육아 시설 정보 제공을 목적으로 하며, 상업적 목적의 무단 크롤링·스크래핑을 금지합니다.<br>
+      ② 서비스에 표시된 업체 정보로 인한 손해에 대해 운영자는 책임을 지지 않습니다.<br>
+      ③ 서비스 운영자는 사전 고지 없이 서비스를 변경·중단할 수 있습니다.</p>
+
+      <h4>제5조 업체 정보 삭제 요청</h4>
+      <p>카카오맵에 등록된 업체 정보의 수정·삭제는 카카오맵(place.map.kakao.com)에서 직접 신청하시기 바랍니다. 본 서비스는 카카오맵 API를 통해 실시간으로 데이터를 표시하므로, 카카오맵에서 수정되면 본 서비스에도 자동 반영됩니다.</p>
+
+      <h4>제6조 쿠키 및 로컬스토리지</h4>
+      <p>본 서비스는 검색 결과 캐싱을 위해 브라우저 sessionStorage를 사용합니다. 이는 사용자의 기기에만 저장되며, 서버로 전송되지 않습니다. 브라우저 탭을 닫으면 자동 삭제됩니다.</p>
+
+      <h4>시행일</h4>
+      <p>본 약관은 2025년 1월 1일부터 시행됩니다.</p>
+      <p style="margin-top:12px;font-size:11px;color:var(--text3)">운영: 오늘아이돌봄 | 문의: contact@todaycare.kr</p>
     </div>
-    <div class="modal-input-row">
-      <input class="modal-input" id="modal-key-input" placeholder="예: a1b2c3d4e5f6g7h8i9j0..." />
-      <button class="modal-apply" onclick="applyKeyFromModal()">적용</button>
+    <button class="modal-close-btn" onclick="closeModal('privacy-modal')">확인</button>
+  </div>
+</div>
+
+<!-- 이용약관 단독 모달 (footer용) -->
+<div class="modal-backdrop" id="terms-modal">
+  <div class="modal-box">
+    <div class="modal-title">📋 이용약관</div>
+    <div class="modal-body">
+      <h4>제1조 목적</h4>
+      <p>본 약관은 오늘아이돌봄 서비스 이용에 관한 조건 및 절차를 규정합니다.</p>
+      <h4>제2조 서비스 이용</h4>
+      <p>① 본 서비스는 수도권 육아 시설 정보를 제공하는 정보 조회 서비스입니다.<br>
+      ② 서비스 이용은 무료이며, 별도의 회원가입이 필요하지 않습니다.<br>
+      ③ 상업적 목적의 데이터 수집(크롤링·스크래핑)은 금지됩니다.</p>
+      <h4>제3조 정보의 정확성</h4>
+      <p>장소 정보는 카카오맵 API를 통해 실시간 제공되며, 정확성을 보장하지 않습니다. 실제 방문 전 업체에 직접 확인하시기 바랍니다.</p>
+      <h4>제4조 면책</h4>
+      <p>서비스에 표시된 정보로 인한 직·간접적 손해에 대해 운영자는 법적 책임을 지지 않습니다.</p>
     </div>
-    <button class="modal-close" onclick="closeKeyModal()">닫기</button>
+    <button class="modal-close-btn" onclick="closeModal('terms-modal')">확인</button>
+  </div>
+</div>
+
+<!-- 업체 등록 모달 -->
+<div class="modal-backdrop" id="reg-modal">
+  <div class="modal-box">
+    <div class="modal-title">🏪 업체 등록 신청</div>
+    <div class="reg-notice">
+      ⚠️ 업체 등록 신청 후 <strong>관리자 검토 (1~3 영업일)</strong>를 거쳐 등록됩니다.<br>
+      허위·부정확한 정보 등록 시 승인이 거부될 수 있습니다.<br>
+      카카오맵에 등록된 업체는 자동으로 검색에 표시됩니다.
+    </div>
+    <div class="reg-form">
+      <div>
+        <label class="reg-label">업체명 *</label>
+        <input class="reg-input" id="reg-name" placeholder="업체명을 입력해주세요"/>
+      </div>
+      <div>
+        <label class="reg-label">주소 *</label>
+        <input class="reg-input" id="reg-addr" placeholder="도로명 주소를 입력해주세요"/>
+      </div>
+      <div>
+        <label class="reg-label">업종 *</label>
+        <select class="reg-input" id="reg-cat">
+          <option value="">선택해주세요</option>
+          <option>키즈카페</option>
+          <option>체험센터</option>
+          <option>어린이도서관</option>
+          <option>육아지원센터</option>
+          <option>시간제보육</option>
+          <option>공동육아나눔터</option>
+          <option>미술·쿠킹 클래스</option>
+          <option>원데이클래스</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div>
+        <label class="reg-label">연락처 *</label>
+        <input class="reg-input" id="reg-phone" placeholder="대표 전화번호"/>
+      </div>
+      <div>
+        <label class="reg-label">사업자등록번호 (선택)</label>
+        <input class="reg-input" id="reg-biz" placeholder="000-00-00000 (입력 시 우선 검토)"/>
+      </div>
+      <label class="reg-agree">
+        <input type="checkbox" id="reg-agree-chk"/>
+        <span><a href="javascript:void(0)" onclick="openModal('privacy-modal')">개인정보처리방침</a> 및 <a href="javascript:void(0)" onclick="openModal('terms-modal')">이용약관</a>에 동의합니다. 제출된 정보는 검토 후 파기됩니다.</span>
+      </label>
+      <button class="reg-submit" onclick="submitReg()">등록 신청</button>
+    </div>
+    <button class="modal-close-btn" onclick="closeModal('reg-modal')">취소</button>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════
-// DATA
+// 카테고리 설정
 // ═══════════════════════════════════
-const PLACES=[
-  {id:101,name:"코엑스 키즈파크",category:"kids_cafe",region:"서울",district:"강남구",address:"서울 강남구 영동대로 513",lat:37.5115,lng:127.0590,phone:"02-6002-5300",operatingHours:"매일 10:30~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1.5만~2만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
-  {id:102,name:"강남구 육아종합지원센터",category:"childcare_support_center",region:"서울",district:"강남구",address:"서울 강남구 논현로 430",lat:37.5172,lng:127.0286,phone:"02-3452-9901",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
-  {id:103,name:"테헤란로 어린이 원데이클래스",category:"one_day_class",region:"서울",district:"강남구",address:"서울 강남구 테헤란로 152",lat:37.5006,lng:127.0368,phone:"02-555-1234",operatingHours:"토~일 10:00~17:00",ageDescription:"만 5세~초등 3학년",priceDescription:"1회 2.5만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
-  {id:201,name:"홍대 키즈카페 토이랜드",category:"kids_cafe",region:"서울",district:"마포구",address:"서울 마포구 와우산로 94",lat:37.5511,lng:126.9242,phone:"02-333-2222",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:true,isFeatured:true,isFree:false},
-  {id:202,name:"마포구 어린이도서관",category:"library_program",region:"서울",district:"마포구",address:"서울 마포구 독막로 324",lat:37.5396,lng:126.9052,phone:"02-3153-8580",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
-  {id:203,name:"망원 쿠킹스튜디오 꼬마요리사",category:"art_cooking_science",region:"서울",district:"마포구",address:"서울 마포구 월드컵로 147",lat:37.5560,lng:126.9046,phone:"010-7777-8888",operatingHours:"토~일 10:00~17:00",ageDescription:"만 4세~초등 6학년",priceDescription:"1회 3만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:false},
-  {id:301,name:"잠실 롯데월드 어드벤처 키즈존",category:"kids_cafe",region:"서울",district:"송파구",address:"서울 송파구 올림픽로 240",lat:37.5111,lng:127.0981,phone:"02-411-2000",operatingHours:"매일 09:30~22:00",ageDescription:"전 연령",priceDescription:"입장료 별도",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:true,isFeatured:true,isFree:false},
-  {id:302,name:"송파 시간제보육센터",category:"hourly_care",region:"서울",district:"송파구",address:"서울 송파구 올림픽로35길 137",lat:37.5145,lng:127.1058,phone:"02-443-1234",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-  {id:303,name:"방이동 어린이 미술공방",category:"art_cooking_science",region:"서울",district:"송파구",address:"서울 송파구 방이동 올림픽로 99",lat:37.5152,lng:127.1214,phone:"02-422-5555",operatingHours:"화~일 10:00~19:00",ageDescription:"만 4세~초등 6학년",priceDescription:"월 8회 12만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:false},
-  {id:401,name:"노원 어린이 과학관",category:"experience_center",region:"서울",district:"노원구",address:"서울 노원구 동일로 1238",lat:37.6554,lng:127.0563,phone:"02-971-6232",operatingHours:"화~일 09:30~17:30",ageDescription:"만 5세~중학생",priceDescription:"3,000원~5,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
-  {id:402,name:"공릉동 키즈카페 레인보우",category:"kids_cafe",region:"서울",district:"노원구",address:"서울 노원구 동일로 1500",lat:37.6401,lng:127.0728,phone:"02-933-4567",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~8세",priceDescription:"아이 1만원, 보호자 무료",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-  {id:501,name:"판교 테크노밸리 키즈파크",category:"kids_cafe",region:"경기",district:"성남시",address:"경기도 성남시 분당구 판교역로 235",lat:37.3948,lng:127.1113,phone:"031-709-5000",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
-  {id:502,name:"분당 어린이체험관",category:"experience_center",region:"경기",district:"성남시",address:"경기도 성남시 분당구 야탑로 81",lat:37.4113,lng:127.1274,phone:"031-737-4000",operatingHours:"화~일 10:00~18:00",ageDescription:"만 3세~초등",priceDescription:"5,000원~8,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
-  {id:503,name:"정자동 공동육아나눔터",category:"shared_care",region:"경기",district:"성남시",address:"경기도 성남시 분당구 정자일로 95",lat:37.3600,lng:127.1142,phone:"031-729-8000",operatingHours:"월~금 09:00~17:00",ageDescription:"만 12세 이하",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
-  {id:601,name:"일산 킨텍스 어린이 놀이공간",category:"public_kids_facility",region:"경기",district:"고양시",address:"경기도 고양시 일산서구 킨텍스로 217",lat:37.7099,lng:126.7351,phone:"031-995-8200",operatingHours:"행사 기간 운영",ageDescription:"전 연령",priceDescription:"무료~유료 (행사마다 다름)",availableToday:false,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
-  {id:602,name:"마두동 키즈카페 점프점프",category:"kids_cafe",region:"경기",district:"고양시",address:"경기도 고양시 일산동구 마두동 마두역로 21",lat:37.6593,lng:126.7701,phone:"031-911-2345",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~9세",priceDescription:"평일 1만원, 주말 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-  {id:603,name:"고양시 육아종합지원센터",category:"childcare_support_center",region:"경기",district:"고양시",address:"경기도 고양시 덕양구 화중로 104",lat:37.6366,lng:126.8317,phone:"031-8075-8075",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
-  {id:701,name:"수원 어린이 생태환경체험관",category:"experience_center",region:"경기",district:"수원시",address:"경기도 수원시 팔달구 창룡대로 21",lat:37.2671,lng:127.0286,phone:"031-228-3333",operatingHours:"화~일 09:00~18:00",ageDescription:"만 3세~초등",priceDescription:"무료",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:true},
-  {id:702,name:"영통 키즈카페 스플래시",category:"kids_cafe",region:"경기",district:"수원시",address:"경기도 수원시 영통구 영통로 197",lat:37.2756,lng:127.0477,phone:"031-202-7777",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"입장료 1.2만~1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-  {id:703,name:"수원 시간제보육 어린이집",category:"hourly_care",region:"경기",district:"수원시",address:"경기도 수원시 권선구 권선로 685",lat:37.2558,lng:127.0130,phone:"031-298-5678",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-  {id:801,name:"키즈파크 동탄점",category:"kids_cafe",region:"경기",district:"화성시",address:"경기도 화성시 동탄반석로 160",lat:37.209,lng:127.075,phone:"031-123-4567",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~12세",priceDescription:"입장료 1만~1.5만원 (보호자 무료)",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
-  {id:802,name:"동탄 키즈카페 플레이그라운드",category:"kids_cafe",region:"경기",district:"화성시",address:"경기도 화성시 동탄반석로 120",lat:37.211,lng:127.077,phone:"031-234-5678",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~10세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:true,isFree:false},
-  {id:803,name:"동탄 아이체험관",category:"experience_center",region:"경기",district:"화성시",address:"경기도 화성시 동탄대로 537",lat:37.2145,lng:127.0812,phone:"031-345-6789",operatingHours:"화~일 09:30~18:30",ageDescription:"만 3세~10세",priceDescription:"프로그램당 1.5만~2.5만원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
-  {id:804,name:"화성시 동탄도서관 어린이실",category:"library_program",region:"경기",district:"화성시",address:"경기도 화성시 동탄문화로 40",lat:37.2078,lng:127.0698,phone:"031-456-7890",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
-  {id:805,name:"동탄 시간제보육 어린이집",category:"hourly_care",region:"경기",district:"화성시",address:"경기도 화성시 동탄순환대로 21길 14",lat:37.2055,lng:127.0822,phone:"031-567-8901",operatingHours:"월~금 09:00~18:00",ageDescription:"만 6개월~36개월",priceDescription:"시간당 1,000원 (정부지원)",availableToday:true,availableWeekend:false,guardianRequired:false,parkingAvailable:false,mealProvided:true,isFeatured:true,isFree:false},
-  {id:806,name:"동탄 공동육아나눔터",category:"shared_care",region:"경기",district:"화성시",address:"경기도 화성시 동탄대로 1039",lat:37.2032,lng:127.0765,phone:"031-678-9012",operatingHours:"월~금 09:00~17:00",ageDescription:"만 12세 이하",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
-  {id:807,name:"리틀아티스트 미술학원",category:"art_cooking_science",region:"경기",district:"화성시",address:"경기도 화성시 동탄반석로 55",lat:37.2118,lng:127.0735,phone:"031-789-0123",operatingHours:"토~일 10:00~17:00",ageDescription:"만 4세~초등 3학년",priceDescription:"1회 2만~3만원",availableToday:false,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
-  {id:808,name:"화성시 육아종합지원센터 동탄",category:"childcare_support_center",region:"경기",district:"화성시",address:"경기도 화성시 동탄대로 1077",lat:37.2025,lng:127.0712,phone:"031-012-3456",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료 (일부 소정 비용)",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
-  {id:901,name:"에버랜드 키즈월드",category:"public_kids_facility",region:"경기",district:"용인시",address:"경기도 용인시 처인구 포곡읍 에버랜드로 199",lat:37.2932,lng:127.2025,phone:"031-320-5000",operatingHours:"매일 10:00~18:00 (계절별 상이)",ageDescription:"전 연령",priceDescription:"입장권 별도",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:true,isFeatured:true,isFree:false},
-  {id:902,name:"수지구 키즈카페 점핑존",category:"kids_cafe",region:"경기",district:"용인시",address:"경기도 용인시 수지구 풍덕천로 126",lat:37.3231,lng:127.0963,phone:"031-888-9999",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~9세",priceDescription:"1만~1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:false},
-  {id:1001,name:"송도 어린이과학관",category:"experience_center",region:"인천",district:"연수구",address:"인천 연수구 센트럴로 263",lat:37.3795,lng:126.6561,phone:"032-850-6000",operatingHours:"화~일 09:30~17:30",ageDescription:"만 3세~중학생",priceDescription:"3,000원~5,000원",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:true,isFree:false},
-  {id:1002,name:"송도 키즈카페 오션파크",category:"kids_cafe",region:"인천",district:"연수구",address:"인천 연수구 컨벤시아대로 165",lat:37.3855,lng:126.6578,phone:"032-210-1234",operatingHours:"매일 10:00~21:00",ageDescription:"만 1세~12세",priceDescription:"평일 1.2만원, 주말 1.8만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-  {id:1003,name:"연수구 육아종합지원센터",category:"childcare_support_center",region:"인천",district:"연수구",address:"인천 연수구 인주대로 141",lat:37.3684,lng:126.6455,phone:"032-899-7700",operatingHours:"월~금 09:00~18:00",ageDescription:"만 0세~5세",priceDescription:"무료",availableToday:true,availableWeekend:false,guardianRequired:true,parkingAvailable:true,mealProvided:false,isFeatured:false,isFree:true},
-  {id:1101,name:"부평 어린이 도서관",category:"library_program",region:"인천",district:"부평구",address:"인천 부평구 부평대로 168",lat:37.4908,lng:126.7224,phone:"032-509-8400",operatingHours:"화~일 09:00~18:00",ageDescription:"전 연령",priceDescription:"무료",availableToday:true,availableWeekend:true,guardianRequired:true,parkingAvailable:false,mealProvided:false,isFeatured:false,isFree:true},
-  {id:1102,name:"부평 키즈카페 판타지아",category:"kids_cafe",region:"인천",district:"부평구",address:"인천 부평구 경인로 537",lat:37.5066,lng:126.7220,phone:"032-508-3333",operatingHours:"매일 10:00~20:00",ageDescription:"만 1세~10세",priceDescription:"평일 1만원, 주말 1.5만원",availableToday:true,availableWeekend:true,guardianRequired:false,parkingAvailable:true,mealProvided:true,isFeatured:false,isFree:false},
-];
-
-const CAT_LABELS={kids_cafe:'키즈카페',experience_center:'체험센터',one_day_class:'원데이클래스',art_cooking_science:'미술·쿠킹',vacation_class:'방학특강',hourly_care:'시간제보육',shared_care:'공동육아나눔터',public_kids_facility:'공공시설',library_program:'도서관',childcare_support_center:'육아지원센터'};
-const CAT_COLORS={kids_cafe:'#f97316',experience_center:'#059669',one_day_class:'#d97706',art_cooking_science:'#7c3aed',vacation_class:'#0284c7',hourly_care:'#16a34a',shared_care:'#db2777',public_kids_facility:'#0891b2',library_program:'#4f46e5',childcare_support_center:'#be185d'};
-const CAT_BG={kids_cafe:'#fff7ed',experience_center:'#f0fdf4',one_day_class:'#fef3c7',art_cooking_science:'#f5f3ff',vacation_class:'#eff6ff',hourly_care:'#f0fdf4',shared_care:'#fdf2f8',public_kids_facility:'#ecfeff',library_program:'#eef2ff',childcare_support_center:'#fdf2f8'};
-const CAT_EMOJI={kids_cafe:'🎪',experience_center:'🔬',one_day_class:'🎨',art_cooking_science:'🖌️',vacation_class:'📚',hourly_care:'🏠',shared_care:'👨‍👩‍👧',public_kids_facility:'🏛️',library_program:'📖',childcare_support_center:'💝'};
-const REGION_DISTRICTS={'서울':['강남구','마포구','송파구','노원구'],'경기':['성남시','고양시','수원시','화성시','용인시'],'인천':['연수구','부평구']};
+const CAT_LABELS={kids_cafe:'키즈카페',experience_center:'체험센터',one_day_class:'원데이클래스',art_cooking:'미술·쿠킹',hourly_care:'시간제보육',shared_care:'공동육아나눔터',public_facility:'공공시설',library:'도서관',childcare_center:'육아지원센터',daycare:'어린이집·유치원'};
+const CAT_COLORS={kids_cafe:'#f97316',experience_center:'#059669',one_day_class:'#d97706',art_cooking:'#7c3aed',hourly_care:'#16a34a',shared_care:'#db2777',public_facility:'#0891b2',library:'#4f46e5',childcare_center:'#be185d',daycare:'#0284c7'};
+const CAT_BG={kids_cafe:'#fff7ed',experience_center:'#f0fdf4',one_day_class:'#fef3c7',art_cooking:'#f5f3ff',hourly_care:'#f0fdf4',shared_care:'#fdf2f8',public_facility:'#ecfeff',library:'#eef2ff',childcare_center:'#fdf2f8',daycare:'#eff6ff'};
+const CAT_EMOJI={kids_cafe:'🎪',experience_center:'🔬',one_day_class:'🎨',art_cooking:'🖌️',hourly_care:'🏠',shared_care:'👨‍👩‍👧',public_facility:'🏛️',library:'📖',childcare_center:'💝',daycare:'🏫'};
+const CAT_KEYWORDS={kids_cafe:['키즈카페','어린이놀이카페'],experience_center:['어린이체험관','키즈체험센터'],one_day_class:['어린이 원데이클래스'],art_cooking:['어린이미술학원','어린이요리교실'],hourly_care:['시간제보육','시간제 어린이집'],shared_care:['공동육아나눔터','육아나눔터'],public_facility:['어린이공원','키즈파크'],library:['어린이도서관','유아도서관'],childcare_center:['육아종합지원센터','육아지원센터'],daycare:['국공립어린이집','공립유치원']};
+const REGION_DISTRICTS={'서울':['강남구','서초구','송파구','마포구','노원구','강서구','영등포구','성동구','중구','종로구'],'경기':['성남시','수원시','고양시','화성시','용인시','부천시','안산시','남양주시','안양시','평택시'],'인천':['연수구','부평구','남동구','서구','미추홀구']};
 
 // ═══════════════════════════════════
 // STATE
 // ═══════════════════════════════════
-let filters={today:false,weekend:false,guardian:false,parking:false,free:false,meal:false,category:'',region:'',district:''};
-let selectedId=null;
-let viewMode='split';
-let filteredPlaces=[];
-let mobileShowMap=false;
-let kakaoMap=null;
-let kakaoMarkers=[];
-let kakaoClusterer=null;
-let openInfoWindow=null;
-let useCluster=true;
-let mapReady=false;
+let kakaoMap=null,kakaoMarkers=[],kakaoClusterer=null,openInfoWindow=null,useCluster=true;
+let places=[],selectedId=null,viewMode='split',mobileShowMap=false;
+let filters={category:'',region:'',district:''};
+let isSearching=false,searchPs=null;
 
-// ═══════════════════════════════════
-// KAKAO MAP INIT
-// ═══════════════════════════════════
-function initKakaoMap(){
-  if(typeof kakao==='undefined'||!kakao.maps){
-    document.getElementById('map-no-key').style.display='flex';
-    return;
-  }
-  document.getElementById('map-no-key').style.display='none';
-  const container=document.getElementById('kakao-map');
-  const options={center:new kakao.maps.LatLng(37.5665,126.9780),level:8};
-  kakaoMap=new kakao.maps.Map(container,options);
-  // Enable zoom control
-  const zoomControl=new kakao.maps.ZoomControl();
-  kakaoMap.addControl(zoomControl,kakao.maps.ControlPosition.RIGHT);
-  // Enable map type control
-  const mapTypeControl=new kakao.maps.MapTypeControl();
-  kakaoMap.addControl(mapTypeControl,kakao.maps.ControlPosition.TOPRIGHT);
-
-  // Clusterer
-  if(kakao.maps.MarkerClusterer){
-    kakaoClusterer=new kakao.maps.MarkerClusterer({
-      map:kakaoMap,
-      averageCenter:true,
-      minLevel:5,
-      disableClickZoom:false,
-      styles:[
-        {width:'42px',height:'42px',background:'rgba(249,115,22,0.85)',color:'#fff',textAlign:'center',lineHeight:'42px',borderRadius:'50%',fontSize:'13px',fontWeight:'700',fontFamily:'Noto Sans KR,sans-serif',border:'2px solid rgba(255,255,255,0.8)'},
-        {width:'52px',height:'52px',background:'rgba(220,90,10,0.9)',color:'#fff',textAlign:'center',lineHeight:'52px',borderRadius:'50%',fontSize:'14px',fontWeight:'700',fontFamily:'Noto Sans KR,sans-serif',border:'2px solid rgba(255,255,255,0.8)'},
-        {width:'62px',height:'62px',background:'rgba(194,65,12,0.92)',color:'#fff',textAlign:'center',lineHeight:'62px',borderRadius:'50%',fontSize:'15px',fontWeight:'700',fontFamily:'Noto Sans KR,sans-serif',border:'2px solid rgba(255,255,255,0.8)'},
-      ]
-    });
-  }
-  mapReady=true;
-  updateMapBadge(true);
-  renderKakaoMarkers();
-}
-
-function updateMapBadge(ok){
-  const badge=document.getElementById('api-status');
-  if(ok){badge.textContent='✅ 카카오맵 연동됨';badge.className='api-key-badge ok';}
-  else{badge.textContent='🔑 API키 설정';badge.className='api-key-badge';}
-}
-
-// ═══════════════════════════════════
-// MARKERS
-// ═══════════════════════════════════
-function makeMarkerImage(p){
-  // Custom SVG marker
-  const color=p.isFeatured?'#eab308':p.availableToday?'#f97316':'#94a3b8';
-  const emoji=CAT_EMOJI[p.category]||'📍';
-  const size=p.isFeatured?36:32;
-  const svgStr=`
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size+8}" viewBox="0 0 ${size} ${size+8}">
-      <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="white" stroke-width="2.5"/>
-      <text x="${size/2}" y="${size/2+4}" text-anchor="middle" font-size="${size*0.45}" font-family="Noto Sans KR,sans-serif">${emoji}</text>
-      <polygon points="${size/2-5},${size} ${size/2+5},${size} ${size/2},${size+7}" fill="${color}"/>
-    </svg>`;
-  const dataUrl='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svgStr)));
-  return new kakao.maps.MarkerImage(dataUrl,new kakao.maps.Size(size,size+8),{offset:new kakao.maps.Point(size/2,size+8)});
-}
-
-function renderKakaoMarkers(){
-  if(!mapReady||!kakaoMap) return;
-  // Clear existing
-  kakaoMarkers.forEach(m=>m.setMap(null));
-  kakaoMarkers=[];
-  if(kakaoClusterer) kakaoClusterer.clear();
-  if(openInfoWindow){openInfoWindow.close();openInfoWindow=null;}
-
-  const visible=filteredPlaces;
-  document.getElementById('map-count').textContent=visible.length;
-
-  visible.forEach(p=>{
-    const pos=new kakao.maps.LatLng(p.lat,p.lng);
-    const marker=new kakao.maps.Marker({position:pos,image:makeMarkerImage(p),title:p.name});
-    // Info window content
-    const iwContent=`<div class="iw-wrap">
-      <button class="iw-close" onclick="this.closest('.iw-wrap').parentNode.__iw.close()">✕</button>
-      <div class="iw-name">${p.name}</div>
-      <div class="iw-cat">${CAT_EMOJI[p.category]||''} ${CAT_LABELS[p.category]||p.category} · ${p.district}</div>
-      ${p.availableToday?'<div class="iw-avail">✓ 오늘 이용 가능</div>':''}
-      ${p.priceDescription?`<div class="iw-price">${p.priceDescription}</div>`:''}
-    </div>`;
-    const infowindow=new kakao.maps.InfoWindow({content:iwContent,removable:false,disableAutoPan:false});
-    // Store ref for close button
-    kakao.maps.event.addListener(marker,'click',function(){
-      if(openInfoWindow&&openInfoWindow!==infowindow) openInfoWindow.close();
-      if(openInfoWindow===infowindow){infowindow.close();openInfoWindow=null;selectPlace(null);return;}
-      infowindow.open(kakaoMap,marker);
-      // Attach iw ref to DOM after small delay
-      setTimeout(()=>{
-        const el=document.querySelector('.iw-wrap');
-        if(el&&el.parentNode) el.parentNode.__iw=infowindow;
-      },50);
-      openInfoWindow=infowindow;
-      selectPlace(p.id);
-    });
-    marker.__placeId=p.id;
-    marker.setMap(useCluster?null:kakaoMap);
-    kakaoMarkers.push(marker);
-  });
-
-  if(kakaoClusterer){
-    if(useCluster) kakaoClusterer.addMarkers(kakaoMarkers);
-    else kakaoClusterer.clear();
-  }
-  if(!useCluster) kakaoMarkers.forEach(m=>m.setMap(kakaoMap));
-}
-
-function recenterMap(){
-  if(!mapReady||!kakaoMap||filteredPlaces.length===0) return;
-  const bounds=new kakao.maps.LatLngBounds();
-  filteredPlaces.forEach(p=>bounds.extend(new kakao.maps.LatLng(p.lat,p.lng)));
-  kakaoMap.setBounds(bounds,60);
-}
-
-function toggleClustering(){
-  useCluster=!useCluster;
-  const btn=document.getElementById('cluster-btn');
-  btn.textContent=useCluster?'🔵 클러스터 ON':'⚪ 클러스터 OFF';
-  btn.className='map-overlay-btn btn-cluster-toggle'+(useCluster?' active':'');
-  renderKakaoMarkers();
-}
-
-function focusMarker(id){
-  if(!mapReady||!kakaoMap) return;
-  const p=PLACES.find(x=>x.id===id);if(!p) return;
-  kakaoMap.panTo(new kakao.maps.LatLng(p.lat,p.lng));
-  if(kakaoMap.getLevel()>5) kakaoMap.setLevel(4);
-  // Open infowindow for this marker
-  const marker=kakaoMarkers.find(m=>m.__placeId===id);
-  if(marker){
-    kakao.maps.event.trigger(marker,'click');
-  }
-}
-
-// ═══════════════════════════════════
-// KAKAO SDK LOADER (runtime key apply)
-// ═══════════════════════════════════
-function loadKakaoSDK(appKey){
-  return new Promise((resolve,reject)=>{
-    // Remove old script if any
-    const old=document.querySelector('script[data-kakao]');
-    if(old) old.remove();
-    const s=document.createElement('script');
-    s.src=`//dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services,clusterer&autoload=false`;
-    s.setAttribute('data-kakao','1');
-    s.onload=()=>{
-      kakao.maps.load(()=>{resolve();});
-    };
-    s.onerror=()=>reject(new Error('카카오맵 SDK 로드 실패. API 키나 도메인 등록을 확인해주세요.'));
-    document.head.appendChild(s);
-  });
-}
-
-function applyKeyFromInput(){
-  const key=document.getElementById('quick-key-input').value.trim();
-  if(!key){alert('API 키를 입력해주세요.');return;}
-  applyKey(key);
-}
-function applyKeyFromModal(){
-  const key=document.getElementById('modal-key-input').value.trim();
-  if(!key){alert('API 키를 입력해주세요.');return;}
-  applyKey(key);
-  closeKeyModal();
-}
-async function applyKey(key){
-  try{
-    // Reset map state
-    kakaoMap=null;kakaoMarkers=[];kakaoClusterer=null;openInfoWindow=null;mapReady=false;
-    document.getElementById('kakao-map').innerHTML='';
-    document.getElementById('map-no-key').style.display='flex';
-    document.getElementById('map-no-key').querySelector('h3').textContent='카카오맵 로딩 중...';
-    // Remove existing kakao global
-    if(window.kakao&&window.kakao.maps) delete window.kakao;
-    await loadKakaoSDK(key);
-    localStorage.setItem('kakao_app_key',key);
-    initKakaoMap();
-  }catch(e){
-    alert('카카오맵 API 오류: '+e.message+'\nAPI 키와 도메인 등록을 확인해주세요.');
-    document.getElementById('map-no-key').querySelector('h3').textContent='카카오맵 API 키가 필요해요';
-  }
-}
-
-function openKeyModal(){document.getElementById('key-modal').classList.add('open');}
-function closeKeyModal(){document.getElementById('key-modal').classList.remove('open');}
-
-// ═══════════════════════════════════
-// FILTER LOGIC
-// ═══════════════════════════════════
-function applyFilters(){
-  return PLACES.filter(p=>{
-    if(filters.region&&p.region!==filters.region)return false;
-    if(filters.district&&p.district!==filters.district)return false;
-    if(filters.category&&p.category!==filters.category)return false;
-    if(filters.today&&!p.availableToday)return false;
-    if(filters.weekend&&!p.availableWeekend)return false;
-    if(filters.guardian&&p.guardianRequired!==false)return false;
-    if(filters.parking&&!p.parkingAvailable)return false;
-    if(filters.free&&!p.isFree)return false;
-    if(filters.meal&&!p.mealProvided)return false;
-    return true;
-  });
-}
-
-// ═══════════════════════════════════
-// REGION / DISTRICT
-// ═══════════════════════════════════
-function selectRegion(r){
-  filters.region=r;filters.district='';
-  ['all','seoul','gyeonggi','incheon'].forEach(k=>{
-    const el=document.getElementById('rgn-'+k);if(el)el.className='region-chip';
-  });
-  const map={'':'all','서울':'seoul','경기':'gyeonggi','인천':'incheon'};
-  const el=document.getElementById('rgn-'+(map[r]||'all'));
-  if(el)el.className='region-chip active';
-  const dbar=document.getElementById('district-bar');
-  if(r&&REGION_DISTRICTS[r]){
-    const districts=REGION_DISTRICTS[r];
-    dbar.innerHTML='<span class="bar-label">🏙️ 구/시</span>'+
-      '<button class="district-chip active" onclick="selectDistrict(\'\')">전체</button>'+
-      districts.map(d=>`<button class="district-chip" onclick="selectDistrict('${d}')">${d}</button>`).join('');
-    dbar.style.display='flex';
-  } else {dbar.style.display='none';}
-  updateRegionBadge();render();
-  // Auto-recenter on region selection
-  setTimeout(()=>recenterMap(),300);
-}
-
-function selectDistrict(d){
-  filters.district=d;
-  document.querySelectorAll('.district-chip').forEach(el=>el.className='district-chip');
-  document.querySelectorAll('.district-chip').forEach(el=>{
-    if(el.textContent===(d||'전체'))el.className='district-chip active';
-  });
-  updateRegionBadge();render();
-  setTimeout(()=>recenterMap(),300);
-}
-
-function updateRegionBadge(){
-  const badge=document.getElementById('region-badge');
-  if(filters.region){
-    let txt=filters.region;if(filters.district)txt+=' '+filters.district;
-    badge.textContent='📍 '+txt;badge.style.display='inline-flex';
-  }else{badge.style.display='none';}
-}
-
-// ═══════════════════════════════════
-// QUICK FILTERS & CATEGORY
-// ═══════════════════════════════════
-function toggleQuick(key){
-  filters[key]=!filters[key];
-  const chip=document.getElementById('chip-'+key);
-  const on=filters[key];
-  if(key==='today'||key==='guardian'||key==='free')chip.className='chip'+(on?' active-green':'');
-  else if(key==='weekend')chip.className='chip'+(on?' active-purple':'');
-  else chip.className='chip'+(on?' active-blue':'');
-  render();
-}
-
-function setCategory(cat){
-  filters.category=filters.category===cat?'':cat;
-  renderCatBar();render();
-}
-
-function renderCatBar(){
-  const bar=document.getElementById('cat-bar');
-  bar.innerHTML='<button class="cat-btn'+(filters.category===''?' active':'')+'" onclick="setCategory(\'\')">전체</button>'+
-    Object.keys(CAT_LABELS).map(c=>`<button class="cat-btn${filters.category===c?' active':''}" onclick="setCategory('${c}')">${CAT_EMOJI[c]} ${CAT_LABELS[c]}</button>`).join('');
-}
-
-// ═══════════════════════════════════
-// SELECT PLACE
-// ═══════════════════════════════════
-function selectPlace(id){
-  selectedId=selectedId===id?null:id;
-  renderList();
-  if(selectedId){
-    setTimeout(()=>{
-      const sel=document.querySelector('.place-card.selected');
-      if(sel)sel.scrollIntoView({behavior:'smooth',block:'nearest'});
-    },50);
-  }
-}
-
-function goToMap(id,e){
-  e.stopPropagation();
-  // Switch to map / split view on mobile
-  if(window.innerWidth<640){
-    mobileShowMap=true;
-    document.getElementById('map-panel').style.display='block';
-    document.getElementById('map-panel').style.flex='1';
-    document.getElementById('list-panel').style.display='none';
-    document.getElementById('fab-icon').textContent='📋';
-    document.getElementById('fab-text').textContent='목록 보기';
-  }
-  focusMarker(id);
-  selectedId=id;renderList();
-}
-
-// ═══════════════════════════════════
-// RENDER LIST
-// ═══════════════════════════════════
-function renderList(){
-  const inner=document.getElementById('list-inner');
-  const isGrid=viewMode==='list';
-  inner.style.display=isGrid?'grid':'flex';
-  inner.style.flexDirection=isGrid?'':'column';
-  if(isGrid){inner.style.gridTemplateColumns='repeat(auto-fill,minmax(260px,1fr))';inner.style.gap='8px';}
-  else{inner.style.gridTemplateColumns='';inner.style.gap='8px';}
-
-  if(filteredPlaces.length===0){
-    inner.innerHTML=`<div class="no-results" style="grid-column:1/-1">
-      <div class="no-results-icon">🔍</div>
-      <p style="font-weight:700;color:var(--text)">조건에 맞는 장소가 없어요</p>
-      <p style="font-size:11px;color:var(--text3);margin-top:4px">지역이나 필터를 조정해 보세요</p>
-      <button class="reset-btn" onclick="resetFilters()">필터 초기화</button>
-    </div>`;return;
-  }
-  inner.innerHTML=filteredPlaces.map(p=>{
-    const cc=CAT_COLORS[p.category]||'#6b7280';
-    const cb=CAT_BG[p.category]||'#f3f4f6';
-    const cl=CAT_LABELS[p.category]||p.category;
-    const em=CAT_EMOJI[p.category]||'📍';
-    const sel=p.id===selectedId;
-    return `<div class="place-card${sel?' selected':''}" onclick="selectPlace(${p.id})">
-      ${p.isFeatured?`<div class="featured-ribbon">⭐ 추천 장소</div>`:''}
-      <div class="card-top">
-        <div class="card-name">${p.name}</div>
-        <span class="cat-badge" style="background:${cb};color:${cc}">${em} ${cl}</span>
-      </div>
-      <div class="avail-row">
-        ${p.availableToday?'<span class="avail-badge avail-today">✓ 오늘 가능</span>':''}
-        ${p.availableWeekend?'<span class="avail-badge avail-weekend">📅 주말 가능</span>':''}
-        ${!p.availableToday&&!p.availableWeekend?'<span class="avail-badge avail-none">예약 문의</span>':''}
-      </div>
-      <div class="card-info">
-        <div class="info-row">
-          <svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM3 6a5 5 0 1 1 10 0c0 3-5 8.5-5 8.5S3 9 3 6z"/></svg>
-          <span class="info-text">${p.address}</span>
-        </div>
-        ${p.operatingHours?`<div class="info-row"><svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4.5v4l2.5 1.5"/></svg><span>${p.operatingHours}</span></div>`:''}
-        ${p.ageDescription?`<div class="info-row"><svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="4" r="2"/><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4"/></svg><span>${p.ageDescription}</span></div>`:''}
-        ${p.phone?`<div class="info-row"><svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2.5c0-.3.2-.5.5-.5H6l1 3-1.5 1.5c.9 1.8 2.2 3.1 4 4L11 9l3 1v2.5c0 .3-.2.5-.5.5C6.5 13 3 6.5 3 2.5z"/></svg><span>${p.phone}</span></div>`:''}
-      </div>
-      ${p.priceDescription?`<div class="price">${p.priceDescription}</div>`:''}
-      <div class="card-footer">
-        <span class="region-tag">${p.region} ${p.district}</span>
-        ${p.parkingAvailable?'<span class="footer-tag">🚗 주차</span>':''}
-        ${p.mealProvided?'<span class="footer-tag green">🍱 식사</span>':''}
-        ${!p.guardianRequired?'<span class="footer-tag orange">보호자 비동반 OK</span>':''}
-        ${mapReady?`<button class="card-map-btn" onclick="goToMap(${p.id},event)">🗺️ 지도 보기</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════
-// VIEW MODES
-// ═══════════════════════════════════
-function setView(v){
-  viewMode=v;
-  ['split','map','list'].forEach(m=>{
-    document.getElementById('vbtn-'+m).className='vbtn'+(m===v?' active':'');
-  });
-  const mp=document.getElementById('map-panel');
-  const lp=document.getElementById('list-panel');
-  if(v==='split'){mp.style.display='';mp.style.flex='1';lp.style.display='';lp.style.width='350px';}
-  else if(v==='map'){mp.style.display='';mp.style.flex='1';lp.style.display='none';}
-  else{mp.style.display='none';lp.style.display='';lp.style.width='100%';}
-  renderList();
-  if(mapReady&&kakaoMap){
-    setTimeout(()=>{kakaoMap.relayout();recenterMap();},100);
-  }
-}
-
-function toggleMobileView(){
-  mobileShowMap=!mobileShowMap;
-  const mp=document.getElementById('map-panel');
-  const lp=document.getElementById('list-panel');
-  if(mobileShowMap){
-    mp.style.display='block';mp.style.flex='1';lp.style.display='none';
-    document.getElementById('fab-icon').textContent='📋';
-    document.getElementById('fab-text').textContent='목록 보기';
-    if(mapReady&&kakaoMap)setTimeout(()=>{kakaoMap.relayout();recenterMap();},100);
-  }else{
-    mp.style.display='none';mp.style.flex='';lp.style.display='';lp.style.width='100%';
-    document.getElementById('fab-icon').textContent='🗺️';
-    document.getElementById('fab-text').textContent='지도 보기';
-  }
-}
-
-function resetFilters(){
-  filters={today:false,weekend:false,guardian:false,parking:false,free:false,meal:false,category:'',region:'',district:''};
-  ['today','weekend','guardian','parking','free','meal'].forEach(k=>document.getElementById('chip-'+k).className='chip');
-  selectRegion('');
-  renderCatBar();render();
-}
-
-// ═══════════════════════════════════
-// MAIN RENDER
-// ═══════════════════════════════════
-function render(){
-  filteredPlaces=applyFilters();
-  document.getElementById('count-num').textContent=filteredPlaces.length;
-  renderList();
-  if(mapReady) renderKakaoMarkers();
+// ✅ 세션 캐시 (API 호출량 절약)
+const searchCache={};
+function getCacheKey(region,district,category){return `${region}|${district}|${category}`;}
+function getCache(key){return searchCache[key]||null;}
+function setCache(key,data){searchCache[key]=data;}
+function clearCache(){
+  Object.keys(searchCache).forEach(k=>delete searchCache[k]);
+  document.getElementById('cache-badge').style.display='none';
+  setStatus('','캐시 초기화됨');
+  setTimeout(()=>setStatus('','지역을 선택하면 자동 검색됩니다'),2000);
 }
 
 // ═══════════════════════════════════
 // INIT
 // ═══════════════════════════════════
-renderCatBar();
-
-// Try to load with saved key or default script
-const savedKey=localStorage.getItem('kakao_app_key');
-if(savedKey){
-  document.getElementById('quick-key-input').value=savedKey;
-  document.getElementById('modal-key-input').value=savedKey;
-  applyKey(savedKey);
-}else{
-  // Try if kakao was loaded via the static script tag with a real key
-  if(typeof kakao!=='undefined'&&kakao.maps){
-    kakao.maps.load(()=>{initKakaoMap();});
-  }else{
-    document.getElementById('map-no-key').style.display='flex';
+function initKakaoMap(){
+  const container=document.getElementById('kakao-map');
+  kakaoMap=new kakao.maps.Map(container,{center:new kakao.maps.LatLng(37.5665,126.9780),level:9});
+  kakaoMap.addControl(new kakao.maps.ZoomControl(),kakao.maps.ControlPosition.RIGHT);
+  kakaoMap.addControl(new kakao.maps.MapTypeControl(),kakao.maps.ControlPosition.TOPRIGHT);
+  if(kakao.maps.MarkerClusterer){
+    kakaoClusterer=new kakao.maps.MarkerClusterer({
+      map:kakaoMap,averageCenter:true,minLevel:5,
+      styles:[
+        {width:'44px',height:'44px',background:'rgba(249,115,22,0.88)',color:'#fff',textAlign:'center',lineHeight:'44px',borderRadius:'50%',fontSize:'13px',fontWeight:'700',fontFamily:'Noto Sans KR,sans-serif',border:'2px solid rgba(255,255,255,0.9)'},
+        {width:'54px',height:'54px',background:'rgba(220,90,10,0.92)',color:'#fff',textAlign:'center',lineHeight:'54px',borderRadius:'50%',fontSize:'14px',fontWeight:'700',fontFamily:'Noto Sans KR,sans-serif',border:'2px solid rgba(255,255,255,0.9)'},
+        {width:'64px',height:'64px',background:'rgba(194,65,12,0.95)',color:'#fff',textAlign:'center',lineHeight:'64px',borderRadius:'50%',fontSize:'15px',fontWeight:'700',fontFamily:'Noto Sans KR,sans-serif',border:'2px solid rgba(255,255,255,0.9)'},
+      ]
+    });
   }
+  searchPs=new kakao.maps.services.Places();
+  renderCatBar();
 }
 
-render();
+// ═══════════════════════════════════
+// 카카오 검색 (캐싱 포함)
+// ═══════════════════════════════════
+async function searchAllCategories(regionQuery){
+  if(isSearching) return;
+  const cacheKey=getCacheKey(filters.region,filters.district,filters.category);
 
-// Resize handler
-window.addEventListener('resize',()=>{
-  if(window.innerWidth<640){
-    document.getElementById('mobile-fab').style.display='flex';
-    if(!mobileShowMap){
-      document.getElementById('map-panel').style.display='none';
-      document.getElementById('list-panel').style.width='100%';
+  // ✅ 캐시 히트 → API 호출 없이 즉시 표시
+  const cached=getCache(cacheKey);
+  if(cached){
+    places=cached;
+    setStatus('cached',`⚡ 캐시에서 로드 (${places.length}개)`);
+    document.getElementById('cache-badge').style.display='inline-flex';
+    document.getElementById('count-num').textContent=places.length;
+    renderList();renderKakaoMarkers();recenterMap();
+    return;
+  }
+
+  isSearching=true;places=[];clearMarkers();
+  showLoading(true,'실제 업체 검색 중...',`카카오맵에서 ${regionQuery} 육아 시설을 찾고 있어요`);
+  setStatus('loading',`🔍 ${regionQuery} 검색 중...`);
+  document.getElementById('cache-badge').style.display='none';
+
+  const cats=filters.category?[filters.category]:Object.keys(CAT_KEYWORDS);
+  let done=0;
+  for(const cat of cats){
+    for(const kw of CAT_KEYWORDS[cat]){
+      await searchByKeyword(`${regionQuery} ${kw}`,cat,1);
+      await searchByKeyword(`${regionQuery} ${kw}`,cat,2);
     }
-  }else{
-    document.getElementById('mobile-fab').style.display='none';
-    setView(viewMode);
+    done++;
+    setProgress(Math.round(done/cats.length*100));
+    updateLoadingText(`검색 중... (${done}/${cats.length})`,`${places.length}개 장소 발견`);
   }
-  if(mapReady&&kakaoMap)setTimeout(()=>kakaoMap.relayout(),150);
-});
 
-if(window.innerWidth<640){
-  document.getElementById('mobile-fab').style.display='flex';
-  document.getElementById('map-panel').style.display='none';
-  document.getElementById('list-panel').style.width='100%';
+  // 중복 제거
+  const seen=new Set();
+  places=places.filter(p=>{if(seen.has(p.id))return false;seen.add(p.id);return true;});
+
+  // ✅ 캐시 저장
+  setCache(cacheKey,[...places]);
+
+  showLoading(false);setProgress(0);isSearching=false;
+  setStatus('done',`✅ ${places.length}개 실제 업체 발견`);
+  document.getElementById('count-num').textContent=places.length;
+  document.getElementById('map-count').textContent=places.length;
+  renderList();renderKakaoMarkers();recenterMap();
 }
 
-// Close modal on backdrop click
-document.getElementById('key-modal').addEventListener('click',function(e){
-  if(e.target===this)closeKeyModal();
+function searchByKeyword(query,cat,page){
+  return new Promise(resolve=>{
+    const opts={size:15,page};
+    if(filters.region){
+      const rc={'서울':{lat:37.5665,lng:126.9780},'경기':{lat:37.4138,lng:127.5183},'인천':{lat:37.4563,lng:126.7052}}[filters.region];
+      if(rc){opts.location=new kakao.maps.LatLng(rc.lat,rc.lng);opts.radius=filters.district?8000:40000;opts.sort=kakao.maps.services.SortBy.DISTANCE;}
+    }
+    searchPs.keywordSearch(query,(data,status)=>{
+      if(status===kakao.maps.services.Status.OK){
+        data.forEach(item=>{
+          places.push({
+            id:item.id,name:item.place_name,
+            category:detectCategory(item.category_name,item.place_name,cat),
+            address:item.road_address_name||item.address_name,
+            lat:parseFloat(item.y),lng:parseFloat(item.x),
+            phone:item.phone,kakaoUrl:item.place_url,
+            region:detectRegion(item.address_name),
+            district:detectDistrict(item.address_name),
+          });
+        });
+      }
+      resolve();
+    },opts);
+  });
+}
+
+async function searchKeyword(){
+  const kw=document.getElementById('keyword-input').value.trim();
+  if(!kw){alert('검색어를 입력해주세요.');return;}
+  if(isSearching) return;
+  isSearching=true;places=[];clearMarkers();
+  showLoading(true,'검색 중...',`"${kw}" 검색 중`);
+  setStatus('loading',`🔍 "${kw}" 검색 중...`);
+  await new Promise(resolve=>{
+    searchPs.keywordSearch(kw,(data,status)=>{
+      if(status===kakao.maps.services.Status.OK){
+        data.forEach(item=>{
+          const region=detectRegion(item.address_name);
+          if(!['서울','경기','인천'].includes(region)) return;
+          places.push({id:item.id,name:item.place_name,category:detectCategory(item.category_name,item.place_name,'kids_cafe'),address:item.road_address_name||item.address_name,lat:parseFloat(item.y),lng:parseFloat(item.x),phone:item.phone,kakaoUrl:item.place_url,region,district:detectDistrict(item.address_name)});
+        });
+      }
+      resolve();
+    },{size:15});
+  });
+  showLoading(false);isSearching=false;
+  setStatus('done',`✅ ${places.length}개 결과`);
+  document.getElementById('count-num').textContent=places.length;
+  renderList();renderKakaoMarkers();recenterMap();
+}
+
+function detectCategory(cn,pn,fb){
+  cn=(cn||'').toLowerCase();pn=(pn||'').toLowerCase();
+  if(cn.includes('키즈카페')||pn.includes('키즈카페')) return 'kids_cafe';
+  if(cn.includes('어린이도서관')||pn.includes('어린이도서관')||pn.includes('유아도서관')) return 'library';
+  if(cn.includes('어린이집')||cn.includes('유치원')) return 'daycare';
+  if(pn.includes('육아종합지원')||pn.includes('육아지원센터')) return 'childcare_center';
+  if(pn.includes('육아나눔터')||pn.includes('공동육아')) return 'shared_care';
+  if(pn.includes('시간제보육')) return 'hourly_care';
+  if(cn.includes('체험관')||pn.includes('체험관')) return 'experience_center';
+  if(pn.includes('원데이')) return 'one_day_class';
+  if(pn.includes('미술')&&(pn.includes('어린이')||pn.includes('키즈'))) return 'art_cooking';
+  return fb||'kids_cafe';
+}
+function detectRegion(addr){if(!addr)return '';if(addr.includes('서울'))return '서울';if(addr.includes('경기'))return '경기';if(addr.includes('인천'))return '인천';return '';}
+function detectDistrict(addr){if(!addr)return '';const m=addr.match(/(\S+[구시군])/);return m?m[1]:'';}
+
+// ═══════════════════════════════════
+// MARKERS
+// ═══════════════════════════════════
+function getMarkerColor(cat){return {kids_cafe:'#f97316',experience_center:'#059669',one_day_class:'#d97706',art_cooking:'#7c3aed',hourly_care:'#16a34a',shared_care:'#db2777',public_facility:'#0891b2',library:'#4f46e5',childcare_center:'#be185d',daycare:'#0284c7'}[cat]||'#94a3b8';}
+
+function makeMarkerImage(p){
+  const color=getMarkerColor(p.category),emoji=CAT_EMOJI[p.category]||'📍',size=28;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size+7}" viewBox="0 0 ${size} ${size+7}"><circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="white" stroke-width="2"/><text x="${size/2}" y="${size/2+4}" text-anchor="middle" font-size="${size*0.42}">${emoji}</text><polygon points="${size/2-4},${size-1} ${size/2+4},${size-1} ${size/2},${size+6}" fill="${color}"/></svg>`;
+  return new kakao.maps.MarkerImage('data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg))),new kakao.maps.Size(size,size+7),{offset:new kakao.maps.Point(size/2,size+7)});
+}
+
+function renderKakaoMarkers(){
+  clearMarkers();
+  const visible=getFilteredPlaces();
+  document.getElementById('map-count').textContent=visible.length;
+  visible.forEach(p=>{
+    const marker=new kakao.maps.Marker({position:new kakao.maps.LatLng(p.lat,p.lng),image:makeMarkerImage(p),title:p.name});
+    // ✅ 면책 문구 인포윈도우 포함
+    const iw=new kakao.maps.InfoWindow({
+      content:`<div class="iw-wrap">
+        <div class="iw-name">${p.name}</div>
+        <div class="iw-cat">${CAT_EMOJI[p.category]||''} ${CAT_LABELS[p.category]||p.category} · ${p.district}</div>
+        ${p.address?`<div class="iw-addr">📍 ${p.address}</div>`:''}
+        ${p.phone?`<div class="iw-phone">📞 ${p.phone}</div>`:''}
+        ${p.kakaoUrl?`<a class="iw-link" href="${p.kakaoUrl}" target="_blank">카카오맵에서 보기 →</a>`:''}
+        <div class="iw-notice">※ 카카오맵 정보 기준. 실제 운영 여부는 업체에 확인하세요.</div>
+      </div>`,
+      removable:true
+    });
+    kakao.maps.event.addListener(marker,'click',()=>{
+      if(openInfoWindow) openInfoWindow.close();
+      if(openInfoWindow===iw){openInfoWindow=null;selectedId=null;renderList();return;}
+      iw.open(kakaoMap,marker);openInfoWindow=iw;
+      selectedId=p.id;renderList();
+      setTimeout(()=>{const s=document.querySelector('.place-card.selected');if(s)s.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
+    });
+    marker.__placeId=p.id;
+    marker.setMap(useCluster?null:kakaoMap);
+    kakaoMarkers.push(marker);
+  });
+  if(kakaoClusterer){if(useCluster)kakaoClusterer.addMarkers(kakaoMarkers);else kakaoClusterer.clear();}
+  if(!useCluster) kakaoMarkers.forEach(m=>m.setMap(kakaoMap));
+}
+
+function clearMarkers(){kakaoMarkers.forEach(m=>m.setMap(null));kakaoMarkers=[];if(kakaoClusterer)kakaoClusterer.clear();if(openInfoWindow){openInfoWindow.close();openInfoWindow=null;}}
+function recenterMap(){if(!kakaoMap||kakaoMarkers.length===0)return;const b=new kakao.maps.LatLngBounds();kakaoMarkers.forEach(m=>b.extend(m.getPosition()));kakaoMap.setBounds(b,60);}
+function focusMarker(id){const p=places.find(x=>x.id===id);if(!p)return;kakaoMap.panTo(new kakao.maps.LatLng(p.lat,p.lng));if(kakaoMap.getLevel()>5)kakaoMap.setLevel(4);const m=kakaoMarkers.find(m=>m.__placeId===id);if(m)kakao.maps.event.trigger(m,'click');}
+function toggleClustering(){useCluster=!useCluster;const btn=document.getElementById('cluster-btn');btn.textContent=useCluster?'🔵 클러스터 ON':'⚪ 클러스터 OFF';btn.className='map-overlay-btn btn-cluster-toggle'+(useCluster?' active':'');renderKakaoMarkers();}
+
+// ═══════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════
+function getFilteredPlaces(){return places.filter(p=>{if(filters.region&&p.region!==filters.region)return false;if(filters.district&&p.district!==filters.district)return false;if(filters.category&&p.category!==filters.category)return false;return true;});}
+
+function selectRegion(r){
+  filters.region=r;filters.district='';
+  ['all','seoul','gyeonggi','incheon'].forEach(k=>{const e=document.getElementById('rgn-'+k);if(e)e.className='region-chip';});
+  const el=document.getElementById('rgn-'+({'':'all','서울':'seoul','경기':'gyeonggi','인천':'incheon'}[r]||'all'));
+  if(el)el.className='region-chip active';
+  const dbar=document.getElementById('district-bar');
+  if(r&&REGION_DISTRICTS[r]){
+    dbar.innerHTML='<span class="bar-label">🏙️ 구/시</span><button class="district-chip active" onclick="selectDistrict(\'\')">전체</button>'+REGION_DISTRICTS[r].map(d=>`<button class="district-chip" onclick="selectDistrict('${d}')">${d}</button>`).join('');
+    dbar.style.display='flex';
+  }else dbar.style.display='none';
+  updateRegionBadge();
+  if(r)searchAllCategories(r);
+  else{places=[];clearMarkers();document.getElementById('count-num').textContent=0;document.getElementById('map-count').textContent=0;document.getElementById('cache-badge').style.display='none';setStatus('','지역을 선택하면 자동 검색됩니다');renderList();kakaoMap.setCenter(new kakao.maps.LatLng(37.5665,126.9780));kakaoMap.setLevel(9);}
+}
+
+function selectDistrict(d){
+  filters.district=d;
+  document.querySelectorAll('.district-chip').forEach(e=>e.className='district-chip');
+  document.querySelectorAll('.district-chip').forEach(e=>{if(e.textContent===(d||'전체'))e.className='district-chip active';});
+  updateRegionBadge();
+  if(filters.region)searchAllCategories(d?`${filters.region} ${d}`:filters.region);
+}
+
+function setCategory(cat){
+  filters.category=filters.category===cat?'':cat;
+  renderCatBar();
+  const f=getFilteredPlaces();
+  document.getElementById('count-num').textContent=f.length;
+  renderList();renderKakaoMarkers();
+}
+
+function updateRegionBadge(){const b=document.getElementById('region-badge');if(filters.region){let t=filters.region;if(filters.district)t+=' '+filters.district;b.textContent='📍 '+t;b.style.display='inline-flex';}else b.style.display='none';}
+function renderCatBar(){const bar=document.getElementById('cat-bar');bar.innerHTML='<button class="cat-btn'+(filters.category===''?' active':'')+'" onclick="setCategory(\'\')">전체</button>'+Object.keys(CAT_LABELS).map(c=>`<button class="cat-btn${filters.category===c?' active':''}" onclick="setCategory('${c}')">${CAT_EMOJI[c]} ${CAT_LABELS[c]}</button>`).join('');}
+
+// ═══════════════════════════════════
+// RENDER LIST (면책 문구 포함)
+// ═══════════════════════════════════
+function renderList(){
+  const inner=document.getElementById('list-inner');
+  const filtered=getFilteredPlaces();
+  const isGrid=viewMode==='list';
+  inner.style.display=isGrid?'grid':'flex';
+  inner.style.flexDirection=isGrid?'':'column';
+  if(isGrid){inner.style.gridTemplateColumns='repeat(auto-fill,minmax(260px,1fr))';inner.style.gap='8px';}
+  else{inner.style.gridTemplateColumns='';inner.style.gap='8px';}
+  if(filtered.length===0){
+    inner.innerHTML=`<div class="no-results" style="grid-column:1/-1"><div class="no-results-icon">${isSearching?'⏳':'🔍'}</div><p style="font-weight:700;color:var(--text)">${isSearching?'검색 중...':'지역을 선택해주세요'}</p><p style="font-size:11px;color:var(--text3);margin-top:4px">지역 선택 시 실제 업체를 자동 검색해요</p></div>`;return;
+  }
+  inner.innerHTML=filtered.map(p=>{
+    const cc=CAT_COLORS[p.category]||'#6b7280',cb=CAT_BG[p.category]||'#f3f4f6',cl=CAT_LABELS[p.category]||p.category,em=CAT_EMOJI[p.category]||'📍',sel=p.id===selectedId;
+    return `<div class="place-card${sel?' selected':''}" onclick="selectPlace('${p.id}')">
+      <div class="card-top"><div class="card-name">${p.name}</div><span class="cat-badge" style="background:${cb};color:${cc}">${em} ${cl}</span></div>
+      <div class="card-info">
+        ${p.address?`<div class="info-row"><svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM3 6a5 5 0 1 1 10 0c0 3-5 8.5-5 8.5S3 9 3 6z"/></svg><span class="info-text">${p.address}</span></div>`:''}
+        ${p.phone?`<div class="info-row"><svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2.5c0-.3.2-.5.5-.5H6l1 3-1.5 1.5c.9 1.8 2.2 3.1 4 4L11 9l3 1v2.5c0 .3-.2.5-.5.5C6.5 13 3 6.5 3 2.5z"/></svg><span>${p.phone}</span></div>`:''}
+      </div>
+      <div class="card-footer">
+        <span class="region-tag">${p.region} ${p.district}</span>
+        ${p.kakaoUrl?`<a class="kakao-link" href="${p.kakaoUrl}" target="_blank" onclick="event.stopPropagation()">카카오맵 ↗</a>`:''}
+        <button class="card-map-btn" onclick="goToMap('${p.id}',event)">🗺️ 지도</button>
+      </div>
+      <div class="data-notice">📌 카카오맵 기준 정보 · 실제 운영 여부는 업체에 확인하세요</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════
+// 업체 등록
+// ═══════════════════════════════════
+function submitReg(){
+  const name=document.getElementById('reg-name').value.trim();
+  const addr=document.getElementById('reg-addr').value.trim();
+  const cat=document.getElementById('reg-cat').value;
+  const phone=document.getElementById('reg-phone').value.trim();
+  const agree=document.getElementById('reg-agree-chk').checked;
+  if(!name||!addr||!cat||!phone){alert('필수 항목을 모두 입력해주세요.');return;}
+  if(!agree){alert('개인정보처리방침 및 이용약관에 동의해주세요.');return;}
+  // 실제 서비스에서는 서버로 전송
+  alert(`✅ 등록 신청이 접수되었습니다!\n\n업체명: ${name}\n주소: ${addr}\n업종: ${cat}\n\n관리자 검토 후 1~3 영업일 내에 연락드리겠습니다.\n입력하신 정보는 검토 후 즉시 파기됩니다.`);
+  ['reg-name','reg-addr','reg-phone','reg-biz'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('reg-cat').value='';
+  document.getElementById('reg-agree-chk').checked=false;
+  closeModal('reg-modal');
+}
+
+// ═══════════════════════════════════
+// VIEW / UI
+// ═══════════════════════════════════
+function setView(v){
+  viewMode=v;
+  ['split','map','list'].forEach(m=>document.getElementById('vbtn-'+m).className='vbtn'+(m===v?' active':''));
+  const mp=document.getElementById('map-panel'),lp=document.getElementById('list-panel');
+  if(v==='split'){mp.style.display='';mp.style.flex='1';lp.style.display='';lp.style.width='350px';}
+  else if(v==='map'){mp.style.display='';mp.style.flex='1';lp.style.display='none';}
+  else{mp.style.display='none';lp.style.display='';lp.style.width='100%';}
+  renderList();if(kakaoMap)setTimeout(()=>kakaoMap.relayout(),100);
+}
+
+function toggleMobileView(){
+  mobileShowMap=!mobileShowMap;
+  const mp=document.getElementById('map-panel'),lp=document.getElementById('list-panel');
+  if(mobileShowMap){mp.style.display='block';mp.style.flex='1';lp.style.display='none';document.getElementById('fab-icon').textContent='📋';document.getElementById('fab-text').textContent='목록 보기';if(kakaoMap)setTimeout(()=>{kakaoMap.relayout();recenterMap();},100);}
+  else{mp.style.display='none';mp.style.flex='';lp.style.display='';lp.style.width='100%';document.getElementById('fab-icon').textContent='🗺️';document.getElementById('fab-text').textContent='지도 보기';}
+}
+
+function selectPlace(id){selectedId=selectedId===id?null:id;renderList();}
+function goToMap(id,e){e.stopPropagation();if(window.innerWidth<640){mobileShowMap=true;document.getElementById('map-panel').style.display='block';document.getElementById('list-panel').style.display='none';document.getElementById('fab-icon').textContent='📋';document.getElementById('fab-text').textContent='목록 보기';if(kakaoMap)setTimeout(()=>kakaoMap.relayout(),100);}focusMarker(id);selectedId=id;renderList();}
+
+function showLoading(show,text,sub){const el=document.getElementById('map-loading');el.style.display=show?'flex':'none';if(text)document.getElementById('loading-text').textContent=text;if(sub)document.getElementById('loading-sub').textContent=sub;}
+function updateLoadingText(t,s){document.getElementById('loading-text').textContent=t;if(s)document.getElementById('loading-sub').textContent=s;}
+function setStatus(type,msg){const el=document.getElementById('search-status');el.textContent=msg;el.className='search-status'+(type?' '+type:'');}
+function setProgress(pct){document.getElementById('progress-bar').style.width=pct+'%';}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+window.addEventListener('resize',()=>{
+  if(window.innerWidth<640){document.getElementById('mobile-fab').style.display='flex';if(!mobileShowMap){document.getElementById('map-panel').style.display='none';document.getElementById('list-panel').style.width='100%';}}
+  else{document.getElementById('mobile-fab').style.display='none';setView(viewMode);}
+  if(kakaoMap)setTimeout(()=>kakaoMap.relayout(),150);
 });
+if(window.innerWidth<640){document.getElementById('mobile-fab').style.display='flex';document.getElementById('map-panel').style.display='none';document.getElementById('list-panel').style.width='100%';}
+
+if(typeof kakao!=='undefined'&&kakao.maps){kakao.maps.load(()=>initKakaoMap());}
 </script>
 </body>
 </html>
