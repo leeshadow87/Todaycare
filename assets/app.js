@@ -530,10 +530,41 @@ function setNeighborhood(key, name) {
   $('loc-name').textContent = name || '동네 설정';
   closeModal('location-modal');
   renderAll();
-  // 동네 변경 시 지도 범위 맞추기
-  setTimeout(() => fitBounds(false), 200);
-  // localStorage 저장
   try { localStorage.setItem('hood', JSON.stringify(state.hood)); } catch(e) {}
+
+  // 지도 이동: 필터 결과 좌표 → 없으면 카카오 장소검색으로 동네 찾기
+  setTimeout(() => {
+    if (!map) return;
+
+    // 전국 선택 시 한국 중앙으로
+    if (!key) {
+      map.setCenter(new kakao.maps.LatLng(KOREA_CENTER.lat, KOREA_CENTER.lng));
+      map.setLevel(KOREA_MAX_LEVEL);
+      return;
+    }
+
+    const pts = filtered.filter(hasCoord);
+
+    if (pts.length > 0) {
+      // 결과 있으면 해당 범위로 지도 이동
+      const bounds = new kakao.maps.LatLngBounds();
+      pts.forEach(p => bounds.extend(new kakao.maps.LatLng(p.lat, p.lng)));
+      map.setBounds(bounds, 50);
+    } else {
+      // 결과 없어도 카카오 장소검색으로 동네 위치 찾아서 이동
+      if (kakao.maps.services) {
+        const ps = new kakao.maps.services.Places();
+        ps.keywordSearch(name, (data, status) => {
+          if (status === kakao.maps.services.Status.OK && data.length > 0) {
+            map.setCenter(new kakao.maps.LatLng(data[0].y, data[0].x));
+            map.setLevel(7);
+          } else {
+            toast(name + ' 위치를 찾지 못했습니다');
+          }
+        });
+      }
+    }
+  }, 150);
 }
 
 // ── 전체 초기화 ──────────────────────────────────────
