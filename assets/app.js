@@ -38,7 +38,9 @@ const state = {
 
 let ALL_DATA = [];
 let filtered = [];
-let SIGUNGU_LIST = []; // 동네 선택용
+let SIDO_LIST = [];    // 시도 목록
+let SIGUNGU_LIST = []; // {sido, sigungu} 목록
+let SUBGU_LIST = [];   // {sido, sigungu, subgu} 하위 구 목록 (화성시 동탄구 등)
 
 // ── 지도 ─────────────────────────────────────────────
 let map, clusterer, markers = [], markerMap = new Map();
@@ -493,11 +495,51 @@ function closeBs() {
 }
 
 // ── 동네 설정 (당근 컨셉) ────────────────────────────
+// 시도 약칭 매핑 (충남→충청남도 등)
+const SIDO_ALIAS = {
+  '서울':'서울특별시','경기':'경기도','인천':'인천광역시',
+  '부산':'부산광역시','대구':'대구광역시','대전':'대전광역시',
+  '광주':'광주광역시','울산':'울산광역시','세종':'세종특별자치시',
+  '강원':'강원특별자치도','충북':'충청북도','충남':'충청남도',
+  '전북':'전북특별자치도','전남':'전라남도','경북':'경상북도',
+  '경남':'경상남도','제주':'제주특별자치도'
+};
+
 function buildSigunguList() {
-  const set = new Set();
-  ALL_DATA.forEach(p => { if (p.sigungu) set.add(p.sigungu); });
-  SIGUNGU_LIST = Array.from(set).sort();
+  const sidoSet = new Set();
+  const sgSet   = new Set();
+  const sgList  = [];
+  const subSet  = new Set();
+  const subList = [];
+
+  ALL_DATA.forEach(p => {
+    if (p.sido) sidoSet.add(p.sido);
+    if (p.sigungu) {
+      const key = (p.sido || '') + '|' + p.sigungu;
+      if (!sgSet.has(key)) {
+        sgSet.add(key);
+        sgList.push({ sido: p.sido || '', sigungu: p.sigungu });
+      }
+      // 주소에서 "시군구 하위 구" 추출 (예: 화성시 동탄구, 성남시 분당구)
+      const addr = p.address || '';
+      const m = addr.match(new RegExp(p.sigungu + '\\s([가-힣]+구)'));
+      if (m) {
+        const subgu = m[1];
+        const subKey = p.sido + '|' + p.sigungu + '|' + subgu;
+        if (!subSet.has(subKey)) {
+          subSet.add(subKey);
+          subList.push({ sido: p.sido || '', sigungu: p.sigungu, subgu });
+        }
+      }
+    }
+  });
+
+  SIDO_LIST    = Array.from(sidoSet).sort();
+  SIGUNGU_LIST = sgList.sort((a, b) => a.sigungu.localeCompare(b.sigungu, 'ko'));
+  SUBGU_LIST   = subList.sort((a, b) => a.subgu.localeCompare(b.subgu, 'ko'));
 }
+
+let _suggestionTimer = null;
 
 function openLocationModal() {
   $('loc-input').value = '';
@@ -506,23 +548,181 @@ function openLocationModal() {
   setTimeout(() => $('loc-input').focus(), 100);
 }
 
+// ── 당근마켓 스타일 동네 검색 ─────────────────────────
+// 1단계: 데이터 기반 (시도·시군구·하위구) 즉시 표시
+// 2단계: 카카오 Places API로 읍·면·동 실시간 추가
 function filterSuggestions(q) {
   const box = $('loc-suggestions');
   const lower = q.trim().toLowerCase();
-  const list  = lower
-    ? SIGUNGU_LIST.filter(s => s.toLowerCase().includes(lower)).slice(0, 20)
-    : SIGUNGU_LIST.slice(0, 20);
+  clearTimeout(_suggestionTimer);
 
-  if (!list.length && lower) {
-    box.innerHTML = `<div style="padding:10px 14px;font-size:13px;color:var(--text3)">검색 결과가 없습니다</div>`;
+  if (!lower) {
+    // 기본: 시도 전체 목록
+    box.innerHTML = SIDO_LIST.map(sido =>
+      `<div class="loc-item" onclick="setNeighborhood('${sido}','${sido}')">
+        <span class="loc-sido">🗺️ ${sido}</span>
+        <span class="loc-all-badge">전체</span>
+      </div>`
+    ).join('') || `<div class="loc-empty">데이터 로딩 중...</div>`;
     return;
   }
-  box.innerHTML = list.map(s => {
-    const hl = lower
-      ? s.replace(new RegExp(`(${lower})`, 'gi'), '<strong>$1</strong>')
-      : s;
-    return `<div class="loc-item" onclick="setNeighborhood('${s}','${s}')">${hl}</div>`;
-  }).join('');
+
+  // ① 데이터 기반 결과 즉시 표시
+  box.innerHTML = buildDataHtml(lower) ||
+    `<div class="loc-empty">🔍 카카오에서 동네 검색 중...</div>`;
+
+  // ② 300ms 후 카카오 읍·면·동 검색 결과 추가
+  _suggestionTimer = setTimeout(() => appendKakaoDong(q, lower, box), 300);
+}
+
+function buildDataHtml(lower) {
+  const hl = s => s.replace(new RegExp(`(${lower})`, 'gi'),
+    '<strong style="color:var(--brand)">$1</strong>');
+  const expandedLower = (SIDO_ALIAS[lower] || '').toLowerCase();
+  let html = '';
+
+  // 시도
+  const sidoMatches = SIDO_LIST.filter(s =>
+    s.toLowerCase().includes(lower) ||
+    (expandedLower && s.toLowerCase().includes(expandedLower))
+  );
+  sidoMatches.forEach(sido => {
+    html += `<div class="loc-item" onclick="setNeighborhood('${sido}','${sido}')">
+      <span class="loc-sido">🗺️ ${sido}</span>
+      <span class="loc-all-badge">전체</span>
+    </div>`;
+  });
+
+  // 시군구
+  const sgMatches = SIGUNGU_LIST.filter(s => {
+    const sig = s.sigungu.toLowerCase();
+    const direct = sig.includes(lower) && !sidoMatches.some(sido => sido.toLowerCase().includes(sig));
+    return direct || sidoMatches.some(sido => s.sido === sido);
+  }).slice(0, 50);
+  sgMatches.forEach(s => {
+    html += `<div class="loc-item" onclick="setNeighborhood('${s.sigungu}','${s.sigungu}')">
+      <span>${hl(s.sigungu)}</span>
+      <span class="loc-sub-text">${s.sido}</span>
+    </div>`;
+  });
+
+  // 하위 구 (동탄구·분당구 등)
+  const subMatches = SUBGU_LIST.filter(s =>
+    s.subgu.toLowerCase().includes(lower) ||
+    sidoMatches.some(sido => s.sido === sido) ||
+    (s.sigungu.toLowerCase().includes(lower) && !sgMatches.find(x => x.sigungu === s.sigungu))
+  );
+  subMatches.forEach(s => {
+    html += `<div class="loc-item" onclick="setNeighborhood('${s.subgu}','${s.subgu}')">
+      <span>${hl(s.subgu)}</span>
+      <span class="loc-sub-text">${s.sigungu} · ${s.sido}</span>
+    </div>`;
+  });
+
+  return html;
+}
+
+// 카카오 Places API로 읍·면·동 단위 검색 후 결과 추가
+function appendKakaoDong(q, lower, box) {
+  if (!kakao?.maps?.services) return;
+  const ps = new kakao.maps.services.Places();
+  ps.keywordSearch(q, (results, status) => {
+    if (status !== kakao.maps.services.Status.OK) return;
+
+    // 읍·면·동 포함 결과만 필터
+    const dongItems = [];
+    const seen = new Set();
+    results.forEach(p => {
+      const addr = p.road_address_name || p.address_name || '';
+      const m = addr.match(/([가-힣]+시|[가-힣]+군)\s([가-힣]+(동|읍|면|가))\b/) ||
+                addr.match(/([가-힣]+구)\s([가-힣]+(동|읍|면|가))\b/);
+      if (!m) return;
+      const dong   = m[2];
+      const parent = m[1];
+      const key    = parent + '|' + dong;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      // 상위 시군구 파악 (필터용)
+      const sigMatch = SIGUNGU_LIST.find(s => addr.includes(s.sigungu));
+      const filterKey = sigMatch ? sigMatch.sigungu : dong;
+      const sidoText  = sigMatch ? sigMatch.sido : '';
+
+      dongItems.push({ dong, parent, filterKey, sidoText, lat: p.y, lng: p.x, addr });
+    });
+
+    if (!dongItems.length) return;
+
+    const divider = `<div class="loc-divider">📍 읍·면·동 검색 결과</div>`;
+    const addHtml = dongItems.slice(0, 8).map(d =>
+      `<div class="loc-item loc-dong"
+        onclick="setNeighborhoodDong('${d.filterKey}','${d.dong}',${d.lat},${d.lng})">
+        <span>📍 <strong style="color:var(--brand)">${d.dong}</strong></span>
+        <span class="loc-sub-text">${d.parent} · ${d.sidoText}</span>
+      </div>`
+    ).join('');
+
+    // 기존 결과 뒤에 추가
+    const cur = box.querySelector('.loc-empty');
+    if (cur) box.innerHTML = divider + addHtml;
+    else box.innerHTML += divider + addHtml;
+  }, { size: 15 });
+}
+
+// 읍·면·동 선택: 지도는 정확한 위치로, 데이터는 상위 시군구로 필터
+function setNeighborhoodDong(filterKey, dongName, lat, lng) {
+  state.hood = {
+    key: filterKey,
+    name: dongName,
+    lat: parseFloat(lat),
+    lng: parseFloat(lng)
+  };
+  $('loc-name').textContent = dongName;
+  closeModal('location-modal');
+  renderAll();
+  try { localStorage.setItem('hood', JSON.stringify(state.hood)); } catch(e) {}
+  setTimeout(() => {
+    if (!map) return;
+    map.setCenter(new kakao.maps.LatLng(parseFloat(lat), parseFloat(lng)));
+    map.setLevel(6);
+  }, 150);
+}
+
+function moveMapByKeyword(name) {
+  if (!map || !name || !kakao.maps.services) return;
+
+  // 행정구역명 → 주소 검색으로 정확한 위치 찾기
+  const geocoder = new kakao.maps.services.Geocoder();
+  geocoder.addressSearch(name, (result, status) => {
+    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+      map.setCenter(new kakao.maps.LatLng(result[0].y, result[0].x));
+      map.setLevel(8);
+      return;
+    }
+
+    // 주소 검색 실패 시 → "홍성군청" / "동탄시청" 방식으로 장소 검색
+    const suffix = name.endsWith('군') ? ' 군청'
+                 : name.endsWith('구') ? ' 구청'
+                 : name.endsWith('시') ? ' 시청'
+                 : ' 행정복지센터';
+    const query = name + suffix;
+
+    const ps = new kakao.maps.services.Places();
+    ps.keywordSearch(query, (data, status2) => {
+      if (status2 === kakao.maps.services.Status.OK && data.length > 0) {
+        map.setCenter(new kakao.maps.LatLng(data[0].y, data[0].x));
+        map.setLevel(8);
+      } else {
+        // 최후 수단: 이름 그대로 검색
+        ps.keywordSearch(name, (data2, status3) => {
+          if (status3 === kakao.maps.services.Status.OK && data2.length > 0) {
+            map.setCenter(new kakao.maps.LatLng(data2[0].y, data2[0].x));
+            map.setLevel(8);
+          }
+        });
+      }
+    });
+  });
 }
 
 function setNeighborhood(key, name) {
@@ -532,38 +732,16 @@ function setNeighborhood(key, name) {
   renderAll();
   try { localStorage.setItem('hood', JSON.stringify(state.hood)); } catch(e) {}
 
-  // 지도 이동: 필터 결과 좌표 → 없으면 카카오 장소검색으로 동네 찾기
+  // 동네 이름으로 카카오 장소검색 → 지도 이동 (좌표 유무 관계없이 항상 실행)
   setTimeout(() => {
     if (!map) return;
-
-    // 전국 선택 시 한국 중앙으로
     if (!key) {
+      // 전국 선택 시 한국 중앙으로
       map.setCenter(new kakao.maps.LatLng(KOREA_CENTER.lat, KOREA_CENTER.lng));
       map.setLevel(KOREA_MAX_LEVEL);
       return;
     }
-
-    const pts = filtered.filter(hasCoord);
-
-    if (pts.length > 0) {
-      // 결과 있으면 해당 범위로 지도 이동
-      const bounds = new kakao.maps.LatLngBounds();
-      pts.forEach(p => bounds.extend(new kakao.maps.LatLng(p.lat, p.lng)));
-      map.setBounds(bounds, 50);
-    } else {
-      // 결과 없어도 카카오 장소검색으로 동네 위치 찾아서 이동
-      if (kakao.maps.services) {
-        const ps = new kakao.maps.services.Places();
-        ps.keywordSearch(name, (data, status) => {
-          if (status === kakao.maps.services.Status.OK && data.length > 0) {
-            map.setCenter(new kakao.maps.LatLng(data[0].y, data[0].x));
-            map.setLevel(7);
-          } else {
-            toast(name + ' 위치를 찾지 못했습니다');
-          }
-        });
-      }
-    }
+    moveMapByKeyword(name);
   }, 150);
 }
 
