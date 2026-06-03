@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>오늘아이돌봄 | 우리 동네 아이돌봄 지도</title>
+<meta name="description" content="우리 동네에서 오늘 아이를 맡길 수 있는 키즈카페, 돌봄기관, 체험센터를 한눈에 찾아보세요.">
+<meta name="theme-color" content="#f97316">
+<meta property="og:title" content="오늘아이돌봄 | 우리 동네 아이돌봄 지도">
+<meta property="og:description" content="우리 동네에서 오늘 아이를 맡길 수 있는 곳을 찾아보세요.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="오늘아이돌봄">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<!-- 카카오맵 JS SDK: 카카오 개발자콘솔 > 앱 설정 > 플랫폼 > Web에서 허용 도메인 등록 필요 -->
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=64378d75cc0d8edba55553350f36c7d1&libraries=clusterer&autoload=false"></script>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ① 헤더: 당근마켓 스타일 -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">🧸</div>
+      <span class="logo-text">오늘아이돌봄</span>
+    </div>
+    <button class="location-btn" id="loc-btn" onclick="openLocationModal()">
+      <span>📍</span>
+      <span class="loc-name" id="loc-name">동네 설정</span>
+      <span class="loc-chevron">▾</span>
+    </button>
+    <button class="btn-register" onclick="openVendorModal()">업체등록</button>
+  </header>
+
+  <!-- ② 검색바 -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search-input" type="text"
+             placeholder="키즈카페, 시간제보육, 공동육아..."
+             oninput="onSearch(this.value)" autocomplete="off">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- ③ 퀵필터 (V1 복원) -->
+  <div class="quick-bar">
+    <button class="chip" id="chip-today"    onclick="toggleFilter('today')">✅ 오늘가능</button>
+    <button class="chip" id="chip-weekend"  onclick="toggleFilter('weekend')">📅 주말가능</button>
+    <button class="chip" id="chip-guardian" onclick="toggleFilter('guardian')">👤 보호자비동반</button>
+    <button class="chip" id="chip-parking"  onclick="toggleFilter('parking')">🚗 주차가능</button>
+    <button class="chip" id="chip-free"     onclick="toggleFilter('free')">🆓 무료</button>
+    <button class="chip" id="chip-meal"     onclick="toggleFilter('meal')">🍱 식사제공</button>
+  </div>
+
+  <!-- ④ 카테고리 -->
+  <div class="cat-bar" id="cat-bar"></div>
+
+  <!-- ⑤ 카운트 + 뷰 토글 -->
+  <div class="view-bar">
+    <div class="view-count">
+      <b id="count-num">0</b>개 장소
+      <span class="count-area" id="count-area"></span>
+    </div>
+    <div class="view-toggle">
+      <button class="vbtn active" id="v-split" onclick="setView('split')">분할</button>
+      <button class="vbtn" id="v-map"   onclick="setView('map')">지도</button>
+      <button class="vbtn" id="v-list"  onclick="setView('list')">목록</button>
+    </div>
+  </div>
+
+  <!-- ⑥ 메인 콘텐츠 -->
+  <div class="main" id="main-area">
+
+    <!-- 리스트 패널 -->
+    <div class="list-panel" id="list-panel">
+      <div class="list-scroll" id="list-scroll">
+        <div class="loading" id="loading">
+          <div class="loading-spinner"></div>
+          <p>데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 지도 패널 -->
+    <div class="map-panel" id="map-panel">
+      <div id="kakao-map" style="width:100%;height:100%"></div>
+      <div class="map-controls">
+        <button class="map-btn" onclick="fitBounds()" title="범위 맞추기">⊕</button>
+        <button class="map-btn active" id="cluster-btn" onclick="toggleCluster()" title="클러스터">⊞</button>
+      </div>
+      <!-- 상세 패널 -->
+      <div class="detail-panel" id="detail-panel">
+        <button class="btn-close-detail" onclick="closeDetail()">✕</button>
+        <div class="detail-scroll">
+          <div id="detail-hero"></div>
+          <div id="detail-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 모바일 FAB -->
+  <button class="mobile-fab" id="mobile-fab" onclick="toggleMobileView()">
+    <span id="fab-icon">🗺️</span>
+    <span id="fab-text">지도 보기</span>
+  </button>
+
+  <!-- 모바일 바텀시트 -->
+  <div class="bs-overlay" id="bs-overlay" onclick="closeBs()"></div>
+  <div class="bottom-sheet" id="bottom-sheet">
+    <div class="bs-handle"></div>
+    <div class="bs-header">
+      <span class="bs-title" id="bs-title">시설 목록</span>
+      <button class="btn-close" onclick="closeBs()">✕</button>
+    </div>
+    <div class="bs-scroll" id="bs-scroll"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- 동네 설정 모달 -->
+<div class="modal-backdrop" id="location-modal" onclick="closeModal('location-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>내 동네 설정</h2>
+      <button class="btn-close" onclick="closeModal('location-modal')">✕</button>
+    </div>
+    <p class="modal-desc">당근마켓처럼 우리 동네를 설정하면<br>그 지역 아이돌봄 장소만 먼저 보여드려요.</p>
+    <div class="loc-input-wrap">
+      <input class="loc-input" id="loc-input" type="text"
+             placeholder="예: 동탄, 화성시, 강남구, 홍성..."
+             oninput="filterSuggestions(this.value)" autocomplete="off">
+    </div>
+    <div class="loc-suggestions" id="loc-suggestions"></div>
+    <button class="btn-loc-all" onclick="setNeighborhood('','전국')">🌏 전국 전체 보기</button>
+  </div>
+</div>
+
+<!-- 업체·기관 등록 모달 -->
+<div class="modal-backdrop" id="vendor-modal" onclick="closeModal('vendor-modal')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>업체·기관 등록 요청</h2>
+      <button class="btn-close" onclick="closeModal('vendor-modal')">✕</button>
+    </div>
+    <p class="modal-desc">아래 내용을 입력하면 운영자에게 등록 요청 메일이 발송됩니다.<br>검수 후 <b>업체 직접 등록</b> 데이터로 반영돼요.</p>
+    <div class="vendor-notice">
+      📌 <b>등록 원칙:</b> 업체가 직접 제출한 정보만 DB에 저장합니다. 네이버·카카오 링크는 위치 확인용 외부 링크로만 사용합니다.
+    </div>
+    <div class="vendor-form" id="vendor-form">
+      <div class="vf-row">
+        <div class="vf-field">
+          <label>시설명 <span class="req">*</span></label>
+          <input id="v_name" class="vf-input" placeholder="예: 오늘키즈카페">
+        </div>
+        <div class="vf-field">
+          <label>업체·기관 구분</label>
+          <select id="v_type" class="vf-select">
+            <option>키즈카페·실내놀이터</option>
+            <option>공동육아·공공돌봄</option>
+            <option>시간제보육·돌봄프로그램</option>
+            <option>체험학습관·체험농장</option>
+            <option>방문미술·놀이교실</option>
+            <option>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="vf-row">
+        <div class="vf-field">
+          <label>담당자명</label>
+          <input id="v_manager" class="vf-input" placeholder="홍길동">
+        </div>
+        <div class="vf-field">
+          <label>연락처 <span class="req">*</span></label>
+          <input id="v_phone" class="vf-input" placeholder="010-0000-0000">
+        </div>
+      </div>
+      <div class="vf-field vf-full">
+        <label>주소 <span class="req">*</span></label>
+        <input id="v_address" class="vf-input" placeholder="도로명 주소를 입력해주세요">
+      </div>
+      <div class="vf-row">
+        <div class="vf-field">
+          <label>대상 연령</label>
+          <input id="v_age" class="vf-input" placeholder="만 3세~초등 저학년">
+        </div>
+        <div class="vf-field">
+          <label>요금·이용료</label>
+          <input id="v_fee" class="vf-input" placeholder="2시간 12,000원">
+        </div>
+      </div>
+      <div class="vf-row">
+        <div class="vf-field">
+          <label>운영시간</label>
+          <input id="v_hours" class="vf-input" placeholder="평일 10:00~19:00">
+        </div>
+        <div class="vf-field">
+          <label>휴무일</label>
+          <input id="v_closed" class="vf-input" placeholder="매주 월요일">
+        </div>
+      </div>
+      <div class="vf-field vf-full">
+        <label>공식 홈페이지·인스타·예약 링크</label>
+        <input id="v_official" class="vf-input" placeholder="https://...">
+      </div>
+      <div class="vf-row">
+        <div class="vf-field">
+          <label>네이버지도 링크 <span class="hint">(위치확인용)</span></label>
+          <input id="v_naver" class="vf-input" placeholder="https://map.naver.com/...">
+        </div>
+        <div class="vf-field">
+          <label>카카오맵 링크 <span class="hint">(위치확인용)</span></label>
+          <input id="v_kakao" class="vf-input" placeholder="https://map.kakao.com/...">
+        </div>
+      </div>
+      <div class="vf-field vf-full">
+        <label>추가 설명</label>
+        <textarea id="v_note" class="vf-textarea" placeholder="오늘 이용 가능 여부, 주차, 보호자 동반 여부, 식사 제공 등 추가 정보를 알려주세요."></textarea>
+      </div>
+    </div>
+    <div class="vendor-actions">
+      <button class="btn-v-reset" onclick="resetVendorForm()">초기화</button>
+      <button class="btn-v-copy" onclick="copyVendorTemplate()">내용 복사</button>
+      <button class="btn-v-submit" onclick="submitVendorByEmail()">📧 등록 요청 메일 보내기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 법적 고지 모달 (최초 1회) -->
+<div class="modal-backdrop" id="legal-modal">
+  <div class="modal modal-legal">
+    <div class="legal-icon">🧸</div>
+    <h2>오늘아이돌봄에 오신 걸 환영해요</h2>
+    <p class="legal-sub">우리 동네에서 오늘 아이를 맡길 수 있는 곳을 쉽게 찾아드려요.</p>
+    <div class="legal-list">
+      <div class="legal-item">
+        <span class="legal-badge badge-direct">업체등록</span>
+        <span>업체·기관이 직접 제출하거나 운영자가 확인한 정보</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-public">공식DB</span>
+        <span>공공데이터·지자체 공개 정보 기반</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-link">외부확인</span>
+        <span>네이버·카카오 지도 위치 확인용 외부 링크</span>
+      </div>
+    </div>
+    <p class="legal-notice">실제 운영 여부·예약 가능 여부·요금은 반드시 해당 기관에 직접 확인하세요.</p>
+    <button class="btn-legal-confirm" onclick="confirmLegal()">확인하고 시작하기 →</button>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
