@@ -1,0 +1,17 @@
+{
+  "name": "오늘아이돌봄",
+  "short_name": "오늘아이돌봄",
+  "description": "우리 동네에서 오늘 아이를 맡길 수 있는 곳을 찾아보세요",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["education", "lifestyle"],
+  "screenshots": []
+}
