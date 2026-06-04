@@ -210,6 +210,7 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',system-ui,sans-
 
 /* 업체 등록 모달 */
 .vendor-notice{background:var(--brand-light);border-radius:8px;padding:9px 12px;font-size:11.5px;color:#9a3412;margin-bottom:14px;line-height:1.5}
+.vendor-notice.gray{background:var(--gray-light);color:var(--text2)}
 .vendor-form{display:flex;flex-direction:column;gap:10px}
 .vf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .vf-field{display:flex;flex-direction:column;gap:4px}

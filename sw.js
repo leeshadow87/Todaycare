@@ -1,6 +1,6 @@
-/* 오늘아이돌봄 v11 - Service Worker */
-const CACHE_NAME = 'todaycare-v11';
-const FONT_CACHE = 'todaycare-fonts-v11';
+/* 오늘아이돌봄 v11_1 - Service Worker */
+const CACHE_NAME = 'todaycare-v11-1';
+const FONT_CACHE = 'todaycare-fonts-v11-1';
 const STATIC_ASSETS = [
   './',
   './index.html',

@@ -1,5 +1,5 @@
 /* =====================================================
-   오늘아이돌봄 v11 - app.js
+   오늘아이돌봄 v11_1 - app.js
    "당근" 컨셉: 내 동네 + 오늘 맡길 수 있는 곳 우선
    카드 정렬: 업체직접등록(0) > 공식DB(1) > 외부링크(2)
    ===================================================== */
@@ -7,6 +7,8 @@
 'use strict';
 
 const VENDOR_EMAIL = ['leeshadow', '87', '@', 'gmail', '.com'].join('');
+// 구글폼 생성 후 "보내기 > 링크"에서 복사한 응답자용 URL을 붙여넣으세요.
+const VENDOR_GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSd-7jGRKZ8YORu2-Beu3c8SCdX2KvCYlXe-ELZ7wfyD2nxsNg/viewform';
 
 // ── 카테고리 메타 ────────────────────────────────────
 const CAT_LABELS = {
@@ -812,15 +814,15 @@ function validateVendorForm() {
   if (!vval('v_phone'))   missing.push('연락처');
   if (!vval('v_address')) missing.push('주소');
   if (missing.length) { toast(missing.join(', ') + '을 입력해주세요'); return false; }
-  if (!$('v_privacy')?.checked) { toast('개인정보 전송 동의가 필요합니다'); return false; }
+  if (!$('v_privacy')?.checked) { toast('개인정보 제출 동의가 필요합니다'); return false; }
   return true;
 }
-function submitVendorByEmail() {
-  if (!validateVendorForm()) return;
-  const subject = encodeURIComponent('[오늘아이돌봄] 업체 등록 요청 - ' + vval('v_name'));
-  const body    = encodeURIComponent(buildVendorText());
-  window.location.href = `mailto:${VENDOR_EMAIL}?subject=${subject}&body=${body}`;
-  toast('메일 앱이 열렸습니다. 전송 버튼을 눌러주세요');
+function openVendorGoogleForm() {
+  if (!VENDOR_GOOGLE_FORM_URL) {
+    toast('구글폼 주소를 먼저 연결해주세요');
+    return;
+  }
+  window.open(VENDOR_GOOGLE_FORM_URL, '_blank', 'noopener');
 }
 function copyVendorTemplate() {
   const text = buildVendorText();
