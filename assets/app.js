@@ -1,5 +1,5 @@
 /* =====================================================
-   오늘아이돌봄 v10 - app.js
+   오늘아이돌봄 v11 - app.js
    "당근" 컨셉: 내 동네 + 오늘 맡길 수 있는 곳 우선
    카드 정렬: 업체직접등록(0) > 공식DB(1) > 외부링크(2)
    ===================================================== */
@@ -48,6 +48,7 @@ const DEFAULT_POS  = { lat: 37.2004, lng: 127.0961 }; // 동탄역 근처
 const KOREA_CENTER = { lat: 36.35, lng: 127.85 };
 const DEFAULT_LEVEL = 7;
 const KOREA_MAX_LEVEL = 12;
+const KAKAO_DONG_SUGGEST_ENABLED = false; // 비용·쿼터 보호: 입력 중 Places 자동검색은 기본 OFF
 
 // ── 유틸 ─────────────────────────────────────────────
 const $  = id => document.getElementById(id);
@@ -83,6 +84,21 @@ function feeLabel(f) {
   return null;
 }
 
+function categoryRank(p) {
+  // 초등돌봄은 대체로 정기 등록형이라 "잠깐 맡기기" 검색에서는 뒤로 보냅니다.
+  return p.category === 'schoolcare' ? 1 : 0;
+}
+
+function hasKnownValue(p, key) {
+  return Object.prototype.hasOwnProperty.call(p, key) && p[key] !== null && p[key] !== '';
+}
+
+function isTodayCandidate(p) {
+  if (p.available_today === true) return true;
+  if (p.reservation_required === false) return true;
+  return p.fee_type === 'free' && p.category !== 'schoolcare';
+}
+
 function hasCoord(p) {
   return typeof p.lat === 'number' && typeof p.lng === 'number' &&
     !Number.isNaN(p.lat) && !Number.isNaN(p.lng);
@@ -92,12 +108,12 @@ function hasCoord(p) {
 // 데이터에 값이 없으면 필터를 강제 적용하지 않음
 function passFilter(p) {
   const f = state.filters;
-  if (f.free     && p.fee_type !== 'free')         return false;
-  if (f.today    && p.available_today    === false) return false;
-  if (f.weekend  && p.available_weekend  === false) return false;
-  if (f.guardian && p.guardian_required  === true)  return false;
-  if (f.parking  && p.parking_available  !== true)  return false;
-  if (f.meal     && p.meal_provided      !== true)  return false;
+  if (f.free     && p.fee_type !== 'free') return false;
+  if (f.today    && !isTodayCandidate(p)) return false;
+  if (f.weekend  && p.available_weekend !== true) return false;
+  if (f.guardian && !(hasKnownValue(p, 'guardian_required') && p.guardian_required === false)) return false;
+  if (f.parking  && p.parking_available !== true) return false;
+  if (f.meal     && p.meal_provided !== true) return false;
   return true;
 }
 
@@ -139,10 +155,12 @@ function applyFilter() {
     }
     return true;
   });
-  // 정렬: 업체등록(0) > 공식DB(1) > 외부링크(2) → 같은 그룹 안에서 검색어 일치도순
+  // 정렬: 업체등록(0) > 공식DB(1) > 외부링크(2) → 초등돌봄 후순위 → 같은 그룹 안에서 검색어 일치도순
   filtered.sort((a, b) => {
     const ra = sourceRank(a), rb = sourceRank(b);
     if (ra !== rb) return ra - rb;
+    const ca = categoryRank(a), cb = categoryRank(b);
+    if (ca !== cb) return ca - cb;
     return searchRank(a, q) - searchRank(b, q);
   });
 }
@@ -217,8 +235,9 @@ function cardHtml(p) {
     p.parking_available === true  ? '<span class="tag">🚗 주차</span>'   : '',
     p.meal_provided     === true  ? '<span class="tag">🍱 식사</span>'   : '',
     p.guardian_required === false ? '<span class="tag orange">보호자비동반</span>' : '',
-    p.available_today   === true  ? '<span class="tag" style="background:#f0fdf4;color:var(--green)">오늘가능</span>' : '',
+    isTodayCandidate(p)           ? '<span class="tag" style="background:#f0fdf4;color:var(--green)">오늘/즉시확인</span>' : '',
     p.available_weekend === true  ? '<span class="tag" style="background:var(--purple-light);color:var(--purple)">주말가능</span>' : '',
+    p.category === 'schoolcare'   ? '<span class="tag" style="background:var(--purple-light);color:var(--purple)">정기등록 확인</span>' : '',
     geo
   ].filter(Boolean).join('');
 
@@ -374,6 +393,7 @@ function renderDetail(p) {
 
   $('detail-body').innerHTML = `
     <div class="notice-box ${noticeCls[rank]}">${noticeTexts[rank]}</div>
+    ${p.category === 'schoolcare' ? '<div class="notice-box gray">초등돌봄은 대부분 정기 등록·대상 조건 확인이 필요한 시설입니다. 당일·일시 이용 가능 여부는 기관에 직접 확인하세요.</div>' : ''}
     <div class="detail-section">
       <div class="detail-section-title">기본 정보</div>
       ${row('📍','주소', esc(p.address || '주소 확인 필요'))}
@@ -389,7 +409,7 @@ function renderDetail(p) {
       ${srcUrl ? row('🔎','출처 링크', `<a href="${esc(srcUrl)}" target="_blank" rel="noopener">바로가기 →</a>`) : ''}
     </div>
     <div class="legal-box">
-      오늘아이돌봄 v10은 시설 정보를 연결하는 서비스이며, 직접 돌봄을 제공하거나 예약을 보증하지 않습니다.
+      오늘아이돌봄 v11은 시설 정보를 연결하는 서비스이며, 직접 돌봄을 제공하거나 예약을 보증하지 않습니다.
     </div>
     <div class="detail-actions">
       ${primaryBtn}
@@ -550,7 +570,7 @@ function openLocationModal() {
 
 // ── 당근마켓 스타일 동네 검색 ─────────────────────────
 // 1단계: 데이터 기반 (시도·시군구·하위구) 즉시 표시
-// 2단계: 카카오 Places API로 읍·면·동 실시간 추가
+// 2단계: 카카오 Places API 읍·면·동 실시간 추가는 비용·쿼터 보호를 위해 기본 OFF
 function filterSuggestions(q) {
   const box = $('loc-suggestions');
   const lower = q.trim().toLowerCase();
@@ -569,10 +589,12 @@ function filterSuggestions(q) {
 
   // ① 데이터 기반 결과 즉시 표시
   box.innerHTML = buildDataHtml(lower) ||
-    `<div class="loc-empty">🔍 카카오에서 동네 검색 중...</div>`;
+    `<div class="loc-empty">검색 결과가 없습니다. 시군구 이름으로 다시 검색해보세요.</div>`;
 
   // ② 300ms 후 카카오 읍·면·동 검색 결과 추가
-  _suggestionTimer = setTimeout(() => appendKakaoDong(q, lower, box), 300);
+  if (KAKAO_DONG_SUGGEST_ENABLED) {
+    _suggestionTimer = setTimeout(() => appendKakaoDong(q, lower, box), 500);
+  }
 }
 
 function buildDataHtml(lower) {
@@ -790,6 +812,7 @@ function validateVendorForm() {
   if (!vval('v_phone'))   missing.push('연락처');
   if (!vval('v_address')) missing.push('주소');
   if (missing.length) { toast(missing.join(', ') + '을 입력해주세요'); return false; }
+  if (!$('v_privacy')?.checked) { toast('개인정보 전송 동의가 필요합니다'); return false; }
   return true;
 }
 function submitVendorByEmail() {
@@ -833,12 +856,12 @@ function closeModal(id) {
 
 // ── 법적 고지 (1회) ──────────────────────────────────
 function confirmLegal() {
-  try { localStorage.setItem('legal_v10_confirmed', '1'); } catch(e) {}
+  try { localStorage.setItem('legal_v11_confirmed', '1'); } catch(e) {}
   closeModal('legal-modal');
 }
 function checkLegal() {
   try {
-    if (localStorage.getItem('legal_v10_confirmed') === '1') return;
+    if (localStorage.getItem('legal_v11_confirmed') === '1') return;
   } catch(e) {}
   $('legal-modal').classList.add('open');
 }

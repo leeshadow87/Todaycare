@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>오늘아이돌봄 | 우리 동네 아이돌봄 지도</title>
+<title>오늘아이돌봄 v11 | 우리 동네 아이돌봄 지도</title>
 <meta name="description" content="우리 동네에서 오늘 아이를 맡길 수 있는 키즈카페, 돌봄기관, 체험센터를 한눈에 찾아보세요.">
 <meta name="theme-color" content="#f97316">
-<meta property="og:title" content="오늘아이돌봄 | 우리 동네 아이돌봄 지도">
+<meta property="og:title" content="오늘아이돌봄 v11 | 우리 동네 아이돌봄 지도">
 <meta property="og:description" content="우리 동네에서 오늘 아이를 맡길 수 있는 곳을 찾아보세요.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -26,7 +26,7 @@
   <header class="header">
     <div class="logo">
       <div class="logo-icon">🧸</div>
-      <span class="logo-text">오늘아이돌봄</span>
+      <span class="logo-text">오늘아이돌봄 v11</span>
     </div>
     <button class="location-btn" id="loc-btn" onclick="openLocationModal()">
       <span>📍</span>
@@ -49,10 +49,10 @@
 
   <!-- ③ 퀵필터 (V1 복원) -->
   <div class="quick-bar">
-    <button class="chip" id="chip-today"    onclick="toggleFilter('today')">✅ 오늘가능</button>
+    <button class="chip" id="chip-today"    onclick="toggleFilter('today')">✅ 오늘/즉시확인</button>
     <button class="chip" id="chip-weekend"  onclick="toggleFilter('weekend')">📅 주말가능</button>
-    <button class="chip" id="chip-guardian" onclick="toggleFilter('guardian')">👤 보호자비동반</button>
-    <button class="chip" id="chip-parking"  onclick="toggleFilter('parking')">🚗 주차가능</button>
+    <button class="chip" id="chip-guardian" onclick="toggleFilter('guardian')">👤 비동반확인</button>
+    <button class="chip" id="chip-parking"  onclick="toggleFilter('parking')">🚗 주차확인</button>
     <button class="chip" id="chip-free"     onclick="toggleFilter('free')">🆓 무료</button>
     <button class="chip" id="chip-meal"     onclick="toggleFilter('meal')">🍱 식사제공</button>
   </div>
@@ -223,6 +223,10 @@
         <label>추가 설명</label>
         <textarea id="v_note" class="vf-textarea" placeholder="오늘 이용 가능 여부, 주차, 보호자 동반 여부, 식사 제공 등 추가 정보를 알려주세요."></textarea>
       </div>
+      <label class="vendor-privacy">
+        <input id="v_privacy" type="checkbox">
+        <span>등록 검수를 위해 시설명, 담당자명, 연락처, 주소 등 제출 정보를 운영자 이메일로 전송하는 데 동의합니다. 제출 정보는 등록 검수와 수정 연락 목적으로만 사용하며, 삭제 요청은 운영자 이메일로 할 수 있습니다.</span>
+      </label>
     </div>
     <div class="vendor-actions">
       <button class="btn-v-reset" onclick="resetVendorForm()">초기화</button>
@@ -250,6 +254,10 @@
       <div class="legal-item">
         <span class="legal-badge badge-link">외부확인</span>
         <span>네이버·카카오 지도 위치 확인용 외부 링크</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-public">정기등록</span>
+        <span>초등돌봄은 대부분 대상 조건·정기 등록 확인이 필요</span>
       </div>
     </div>
     <p class="legal-notice">실제 운영 여부·예약 가능 여부·요금은 반드시 해당 기관에 직접 확인하세요.</p>
