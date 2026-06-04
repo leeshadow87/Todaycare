@@ -211,24 +211,12 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',system-ui,sans-
 /* 업체 등록 모달 */
 .vendor-notice{background:var(--brand-light);border-radius:8px;padding:9px 12px;font-size:11.5px;color:#9a3412;margin-bottom:14px;line-height:1.5}
 .vendor-notice.gray{background:var(--gray-light);color:var(--text2)}
-.vendor-form{display:flex;flex-direction:column;gap:10px}
-.vf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.vf-field{display:flex;flex-direction:column;gap:4px}
-.vf-field.vf-full{grid-column:1/-1}
-.vf-field label{font-size:12px;font-weight:600;color:var(--text2)}
-.req{color:var(--brand)}
-.hint{font-weight:400;color:var(--text3)}
-.vf-input{border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-family:inherit;color:var(--text);outline:none;width:100%}
-.vf-input:focus{border-color:var(--brand)}
-.vf-select{border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-family:inherit;color:var(--text);outline:none;width:100%;background:#fff}
-.vf-select:focus{border-color:var(--brand)}
-.vf-textarea{border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-family:inherit;color:var(--text);outline:none;width:100%;min-height:80px;resize:vertical}
-.vf-textarea:focus{border-color:var(--brand)}
-.vendor-privacy{display:flex;align-items:flex-start;gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 11px;font-size:11.5px;line-height:1.5;color:var(--text2);cursor:pointer}
-.vendor-privacy input{margin-top:3px;flex-shrink:0;accent-color:var(--brand)}
+.vendor-checklist{border:1px solid var(--border);background:#fff;border-radius:10px;padding:13px 14px;margin-bottom:14px}
+.vendor-checklist h3{font-size:13px;font-weight:700;margin-bottom:9px;color:var(--text)}
+.vendor-checklist ul{display:flex;flex-direction:column;gap:7px;margin:0;padding-left:18px}
+.vendor-checklist li{font-size:12px;color:var(--text2);line-height:1.45}
 .vendor-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
-.btn-v-reset{padding:9px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-family:inherit}
-.btn-v-copy{padding:9px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-family:inherit}
+.btn-v-reset{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-family:inherit}
 .btn-v-submit{flex:1;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--brand);color:#fff;font-family:inherit;transition:background .15s}
 .btn-v-submit:hover{background:var(--brand-dark)}
 

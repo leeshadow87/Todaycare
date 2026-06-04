@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>오늘아이돌봄 v11_1 | 우리 동네 아이돌봄 지도</title>
+<title>오늘아이돌봄 v11_2 | 우리 동네 아이돌봄 지도</title>
 <meta name="description" content="우리 동네에서 오늘 아이를 맡길 수 있는 키즈카페, 돌봄기관, 체험센터를 한눈에 찾아보세요.">
 <meta name="theme-color" content="#f97316">
-<meta property="og:title" content="오늘아이돌봄 v11_1 | 우리 동네 아이돌봄 지도">
+<meta property="og:title" content="오늘아이돌봄 v11_2 | 우리 동네 아이돌봄 지도">
 <meta property="og:description" content="우리 동네에서 오늘 아이를 맡길 수 있는 곳을 찾아보세요.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -26,7 +26,7 @@
   <header class="header">
     <div class="logo">
       <div class="logo-icon">🧸</div>
-      <span class="logo-text">오늘아이돌봄 v11_1</span>
+      <span class="logo-text">오늘아이돌봄 v11_2</span>
     </div>
     <button class="location-btn" id="loc-btn" onclick="openLocationModal()">
       <span>📍</span>
@@ -153,87 +153,20 @@
     <div class="vendor-notice">
       📌 <b>등록 원칙:</b> 업체가 구글폼으로 직접 제출한 정보만 DB에 저장합니다. 네이버·카카오 링크는 위치 확인용 외부 링크로만 사용합니다.
     </div>
-    <div class="vendor-notice gray">
-      아래 입력칸은 구글폼 작성 전에 내용을 정리하거나 복사하기 위한 보조용입니다.
+    <div class="vendor-checklist">
+      <h3>등록 전 준비하면 좋은 정보</h3>
+      <ul>
+        <li>업체·기관명, 담당자명, 연락처</li>
+        <li>주소와 업체·기관 구분</li>
+        <li>공식 홈페이지·인스타·예약 링크</li>
+        <li>네이버지도 또는 카카오맵 링크</li>
+      </ul>
     </div>
-    <div class="vendor-form" id="vendor-form">
-      <div class="vf-row">
-        <div class="vf-field">
-          <label>시설명 <span class="req">*</span></label>
-          <input id="v_name" class="vf-input" placeholder="예: 오늘키즈카페">
-        </div>
-        <div class="vf-field">
-          <label>업체·기관 구분</label>
-          <select id="v_type" class="vf-select">
-            <option>키즈카페·실내놀이터</option>
-            <option>공동육아·공공돌봄</option>
-            <option>시간제보육·돌봄프로그램</option>
-            <option>체험학습관·체험농장</option>
-            <option>방문미술·놀이교실</option>
-            <option>기타</option>
-          </select>
-        </div>
-      </div>
-      <div class="vf-row">
-        <div class="vf-field">
-          <label>담당자명</label>
-          <input id="v_manager" class="vf-input" placeholder="홍길동">
-        </div>
-        <div class="vf-field">
-          <label>연락처 <span class="req">*</span></label>
-          <input id="v_phone" class="vf-input" placeholder="010-0000-0000">
-        </div>
-      </div>
-      <div class="vf-field vf-full">
-        <label>주소 <span class="req">*</span></label>
-        <input id="v_address" class="vf-input" placeholder="도로명 주소를 입력해주세요">
-      </div>
-      <div class="vf-row">
-        <div class="vf-field">
-          <label>대상 연령</label>
-          <input id="v_age" class="vf-input" placeholder="만 3세~초등 저학년">
-        </div>
-        <div class="vf-field">
-          <label>요금·이용료</label>
-          <input id="v_fee" class="vf-input" placeholder="2시간 12,000원">
-        </div>
-      </div>
-      <div class="vf-row">
-        <div class="vf-field">
-          <label>운영시간</label>
-          <input id="v_hours" class="vf-input" placeholder="평일 10:00~19:00">
-        </div>
-        <div class="vf-field">
-          <label>휴무일</label>
-          <input id="v_closed" class="vf-input" placeholder="매주 월요일">
-        </div>
-      </div>
-      <div class="vf-field vf-full">
-        <label>공식 홈페이지·인스타·예약 링크</label>
-        <input id="v_official" class="vf-input" placeholder="https://...">
-      </div>
-      <div class="vf-row">
-        <div class="vf-field">
-          <label>네이버지도 링크 <span class="hint">(위치확인용)</span></label>
-          <input id="v_naver" class="vf-input" placeholder="https://map.naver.com/...">
-        </div>
-        <div class="vf-field">
-          <label>카카오맵 링크 <span class="hint">(위치확인용)</span></label>
-          <input id="v_kakao" class="vf-input" placeholder="https://map.kakao.com/...">
-        </div>
-      </div>
-      <div class="vf-field vf-full">
-        <label>추가 설명</label>
-        <textarea id="v_note" class="vf-textarea" placeholder="오늘 이용 가능 여부, 주차, 보호자 동반 여부, 식사 제공 등 추가 정보를 알려주세요."></textarea>
-      </div>
-      <label class="vendor-privacy">
-        <input id="v_privacy" type="checkbox">
-        <span>등록 검수를 위해 시설명, 담당자명, 연락처, 주소 등 제출 정보를 구글폼으로 제출하는 데 동의합니다. 제출 정보는 등록 검수와 수정 연락 목적으로만 사용하며, 삭제 요청은 운영자 이메일로 할 수 있습니다.</span>
-      </label>
+    <div class="vendor-notice gray">
+      구글폼에서 개인정보 수집·이용 동의를 확인한 뒤 제출합니다.
     </div>
     <div class="vendor-actions">
-      <button class="btn-v-reset" onclick="resetVendorForm()">초기화</button>
-      <button class="btn-v-copy" onclick="copyVendorTemplate()">내용 복사</button>
+      <button class="btn-v-reset" onclick="closeModal('vendor-modal')">닫기</button>
       <button class="btn-v-submit" onclick="openVendorGoogleForm()">구글폼으로 등록</button>
     </div>
   </div>

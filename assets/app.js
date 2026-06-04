@@ -1,5 +1,5 @@
 /* =====================================================
-   오늘아이돌봄 v11_1 - app.js
+   오늘아이돌봄 v11_2 - app.js
    "당근" 컨셉: 내 동네 + 오늘 맡길 수 있는 곳 우선
    카드 정렬: 업체직접등록(0) > 공식DB(1) > 외부링크(2)
    ===================================================== */
@@ -783,59 +783,13 @@ function resetAll() {
   renderAll();
 }
 
-// ── 업체 등록 폼 ─────────────────────────────────────
-function vval(id) {
-  const el = $(id);
-  return el ? String(el.value || '').trim() : '';
-}
-function buildVendorText() {
-  return `[오늘아이돌봄 업체/기관 등록 요청]
-
-시설명: ${vval('v_name')}
-업체·기관 구분: ${vval('v_type')}
-담당자명: ${vval('v_manager')}
-연락처: ${vval('v_phone')}
-주소: ${vval('v_address')}
-대상 연령: ${vval('v_age')}
-요금·이용료: ${vval('v_fee')}
-운영시간: ${vval('v_hours')}
-휴무일: ${vval('v_closed')}
-공식·예약 링크: ${vval('v_official')}
-네이버지도 링크: ${vval('v_naver')}
-카카오맵 링크: ${vval('v_kakao')}
-추가 설명: ${vval('v_note')}
-
-※ 제출된 정보는 운영자 확인 후 업체 직접 등록 데이터로 반영됩니다.
-※ 네이버/카카오 링크는 위치 확인용 외부 링크로만 사용합니다.`;
-}
-function validateVendorForm() {
-  const missing = [];
-  if (!vval('v_name'))    missing.push('시설명');
-  if (!vval('v_phone'))   missing.push('연락처');
-  if (!vval('v_address')) missing.push('주소');
-  if (missing.length) { toast(missing.join(', ') + '을 입력해주세요'); return false; }
-  if (!$('v_privacy')?.checked) { toast('개인정보 제출 동의가 필요합니다'); return false; }
-  return true;
-}
+// ── 업체 등록 ───────────────────────────────────────
 function openVendorGoogleForm() {
   if (!VENDOR_GOOGLE_FORM_URL) {
     toast('구글폼 주소를 먼저 연결해주세요');
     return;
   }
   window.open(VENDOR_GOOGLE_FORM_URL, '_blank', 'noopener');
-}
-function copyVendorTemplate() {
-  const text = buildVendorText();
-  navigator.clipboard?.writeText(text)
-    .then(() => toast('등록 요청 내용을 복사했습니다'))
-    .catch(() => toast('복사 실패: 직접 복사해주세요'));
-}
-function resetVendorForm() {
-  ['v_name','v_manager','v_phone','v_address','v_age','v_fee','v_hours','v_closed','v_official','v_naver','v_kakao','v_note']
-    .forEach(id => { const el = $(id); if (el) el.value = ''; });
-  const sel = $('v_type');
-  if (sel) sel.selectedIndex = 0;
-  toast('입력 내용을 초기화했습니다');
 }
 function openVendorModal() { $('vendor-modal').classList.add('open'); }
 
