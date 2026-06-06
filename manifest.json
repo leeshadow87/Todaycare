@@ -1,0 +1,18 @@
+{
+  "name": "오늘아이돌봄지도",
+  "short_name": "오늘돌봄",
+  "description": "국가서비스, 공공돌봄, 키즈카페, 실내놀이터, 도서관 프로그램, 체험수업을 한 번에 찾는 우리동네 돌봄·놀이 통합 검색 지도",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["education", "lifestyle"],
+  "screenshots": []
+}
