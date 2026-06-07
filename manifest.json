@@ -1,0 +1,56 @@
+{
+  "id": "/",
+  "name": "오늘아이돌봄지도",
+  "short_name": "오늘돌봄",
+  "description": "국가서비스, 공공돌봄, 키즈카페, 실내놀이터, 도서관 프로그램, 체험수업을 한 번에 찾는 우리동네 돌봄·놀이 통합 검색 지도",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "lang": "ko",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["education", "lifestyle", "parenting", "kids"],
+  "shortcuts": [
+    {
+      "name": "업체 무료 등록",
+      "short_name": "무료등록",
+      "description": "오늘아이돌봄지도에 업체·기관을 무료로 등록합니다.",
+      "url": "./?vendor=register",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "우리 동네 장소 찾기",
+      "short_name": "장소찾기",
+      "description": "우리 동네 돌봄·놀이 장소를 검색합니다.",
+      "url": "./",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/mobile-home.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "모바일에서 돌봄·놀이 장소를 검색하는 화면"
+    },
+    {
+      "src": "screenshots/desktop-map.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "데스크톱에서 지도와 목록을 함께 보는 화면"
+    }
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
+}
