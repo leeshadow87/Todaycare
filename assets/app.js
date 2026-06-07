@@ -231,24 +231,13 @@ function renderList() {
   ].filter(s => s.items.length > 0);
 
   let html = '';
-  let cardCount = 0;
-  const BANNER_INSERT_AFTER = 4; // 카드 4개 후 배너 삽입
-  let bannerInserted = false;
 
   sections.forEach(sec => {
     html += `<div class="list-section-title">${sec.title} (${sec.items.length})</div>`;
     sec.items.forEach(p => {
       html += cardHtml(p);
-      cardCount++;
-      // 업체등록 배너: 4번째 카드 다음에 1회 삽입 (업체등록 데이터가 없을 때만)
-      if (!bannerInserted && cardCount === BANNER_INSERT_AFTER && sec.rank !== 0) {
-        html += regBannerHtml();
-        bannerInserted = true;
-      }
     });
   });
-  // 카드가 4개 미만이면 맨 끝에 배너 삽입
-  if (!bannerInserted) { html += regBannerHtml(); }
 
   scroll.innerHTML = html;
   bsScroll.innerHTML = html;
@@ -822,24 +811,6 @@ function resetAll() {
   $('search-clear').classList.remove('show');
   renderCatBar();
   renderAll();
-}
-
-// ── 업체 등록 배너 카드 HTML ──────────────────────────
-function regBannerHtml() {
-  return `<div class="reg-banner-card" onclick="openVendorModal()">
-    <div class="reg-banner-top">
-      <span class="reg-banner-badge">무료 등록</span>
-      <span class="reg-banner-sub">✨ 초기 등록 기관 우선 노출</span>
-    </div>
-    <div class="reg-banner-title">🏪 우리 기관을 무료로 등록하세요</div>
-    <div class="reg-banner-desc">키즈카페·실내놀이터·체험수업·공동육아공간<br>등록 후 지역 부모에게 바로 노출됩니다</div>
-    <div class="reg-banner-benefits">
-      <span>✅ 등록비 0원</span>
-      <span>📍 지도·검색 노출</span>
-      <span>📞 전화·예약링크 연결</span>
-    </div>
-    <div class="reg-banner-btn">무료 등록하기 →</div>
-  </div>`;
 }
 
 // ── 업체 등록 ───────────────────────────────────────
