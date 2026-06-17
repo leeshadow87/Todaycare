@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>오늘아이돌봄지도 | 우리 동네 돌봄·놀이 통합 검색 지도</title>
+<meta name="description" content="국가서비스, 공공돌봄, 키즈카페, 실내놀이터, 도서관 프로그램, 체험수업을 한 번에 찾는 우리동네 돌봄·놀이 통합 검색 지도">
+<meta name="theme-color" content="#f97316">
+<meta name="color-scheme" content="light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="오늘돌봄">
+<meta property="og:title" content="오늘아이돌봄지도 | 우리 동네 돌봄·놀이 통합 검색 지도">
+<meta property="og:description" content="국가서비스부터 키즈카페까지 오늘 갈 수 있는 돌봄·놀이 장소를 한 번에 찾아보세요.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icons/icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="오늘돌봄">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<!-- 카카오맵 JS SDK는 지도 배경 렌더링과 자체 DB 좌표 마커 표시용입니다.
+     카카오 Local/Places API 검색 결과를 장소 DB로 저장·복제·재배포하지 않습니다.
+     카카오 개발자콘솔에서 허용 도메인을 반드시 제한하세요. -->
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=64378d75cc0d8edba55553350f36c7d1&libraries=clusterer,services&autoload=false"></script>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ① 헤더: 당근마켓 스타일 -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon"><img src="icons/todaycare-bear.svg" alt="" aria-hidden="true"></div>
+      <span class="logo-text">오늘아이돌봄지도</span>
+    </div>
+    <button class="location-btn" id="loc-btn" onclick="openLocationModal()">
+      <span>📍</span>
+      <span class="loc-name" id="loc-name">동네 설정</span>
+      <span class="loc-chevron">▾</span>
+    </button>
+  </header>
+
+  <!-- PWA 설치 배너: Android Chrome (beforeinstallprompt) -->
+  <div class="pwa-banner" id="pwa-install-banner">
+    <img class="pwa-banner-icon" src="icons/todaycare-bear.svg" alt="" aria-hidden="true">
+    <div class="pwa-banner-text">
+      <b>앱으로 설치하기</b>
+      <span>홈 화면 추가 → 앱처럼 빠르게 열려요</span>
+    </div>
+    <button class="pwa-banner-btn" onclick="triggerPwaInstall()">설치</button>
+    <button class="pwa-banner-close" onclick="dismissPwaInstall()">✕</button>
+  </div>
+
+  <!-- PWA 설치 배너: iOS Safari -->
+  <div class="pwa-banner pwa-ios" id="pwa-ios-banner">
+    <img class="pwa-banner-icon" src="icons/todaycare-bear.svg" alt="" aria-hidden="true">
+    <div class="pwa-banner-text">
+      <b>홈 화면에 추가하기</b>
+      <span>Safari 하단 공유(□↑) → "홈 화면에 추가"</span>
+    </div>
+    <button class="pwa-banner-close" onclick="dismissIosBanner()">✕</button>
+  </div>
+
+  <!-- ② 업체등록 CTA 띠 -->
+  <div class="vendor-cta-strip" id="vendor-cta-strip">
+    <div class="vendor-cta-copy">
+      <b>🏪 우리 기관 무료로 등록하세요</b>
+      <span>키즈카페·실내놀이터·체험수업 · 초기 등록 우선 노출 · 등록비 0원</span>
+    </div>
+    <button type="button" onclick="openVendorModal()">등록하기</button>
+  </div>
+
+  <!-- ③ 검색바 -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search-input" type="text"
+             placeholder="오늘 비 오는데 5살 아이랑 갈 곳"
+             oninput="onSearch(this.value)" autocomplete="off">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- ④ 퀵필터 -->
+  <div class="quick-bar">
+    <button class="chip" id="chip-today"    onclick="toggleFilter('today')">✅ 오늘/즉시확인</button>
+    <button class="chip" id="chip-weekend"  onclick="toggleFilter('weekend')">📅 주말가능</button>
+    <button class="chip" id="chip-guardian" onclick="toggleFilter('guardian')">👤 비동반확인</button>
+    <button class="chip" id="chip-parking"  onclick="toggleFilter('parking')">🚗 주차확인</button>
+    <button class="chip" id="chip-free"     onclick="toggleFilter('free')">🆓 무료</button>
+    <button class="chip" id="chip-meal"     onclick="toggleFilter('meal')">🍱 식사제공</button>
+  </div>
+
+  <!-- ⑤ 서비스 안내 -->
+  <div class="policy-strip">
+    <b>📍 서비스 확장 중</b>
+    <span><a href="privacy.html">개인정보처리방침</a> · <a href="terms.html">이용안내</a> · 공공데이터 기반 전국 4,000여 곳 수록 · 업체 직접 등록 상시 접수 중</span>
+  </div>
+
+  <!-- ④ 카테고리 -->
+  <div class="cat-bar" id="cat-bar"></div>
+
+  <!-- ⑤ 카운트 + 뷰 토글 -->
+  <div class="view-bar">
+    <div class="view-count">
+      <b id="count-num">0</b>개 장소
+      <span class="count-area" id="count-area"></span>
+    </div>
+    <div class="view-toggle">
+      <button class="vbtn active" id="v-split" onclick="setView('split')">분할</button>
+      <button class="vbtn" id="v-map"   onclick="setView('map')">지도</button>
+      <button class="vbtn" id="v-list"  onclick="setView('list')">목록</button>
+    </div>
+  </div>
+
+  <!-- ⑥ 메인 콘텐츠 -->
+  <div class="main" id="main-area">
+
+    <!-- 리스트 패널 -->
+    <div class="list-panel" id="list-panel">
+      <div class="list-scroll" id="list-scroll">
+        <div class="loading" id="loading">
+          <div class="loading-spinner"></div>
+          <p>데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 지도 패널 -->
+    <div class="map-panel" id="map-panel">
+      <div id="kakao-map" style="width:100%;height:100%"></div>
+      <div class="map-controls">
+        <button class="map-btn" onclick="fitBounds()" title="범위 맞추기">⊕</button>
+        <button class="map-btn active" id="cluster-btn" onclick="toggleCluster()" title="클러스터">⊞</button>
+      </div>
+      <!-- 상세 패널 -->
+      <div class="detail-panel" id="detail-panel">
+        <button class="btn-close-detail" onclick="closeDetail()">✕</button>
+        <div class="detail-scroll">
+          <div id="detail-hero"></div>
+          <div id="detail-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 모바일 FAB 그룹 -->
+  <div class="mobile-fab-group" id="mobile-fab-group">
+    <button class="mobile-fab" id="mobile-fab" onclick="toggleMobileView()">
+      <span id="fab-icon">🗺️</span>
+      <span id="fab-text">지도 보기</span>
+    </button>
+  </div>
+
+  <!-- 모바일 바텀시트 -->
+  <div class="bs-overlay" id="bs-overlay" onclick="closeBs()"></div>
+  <div class="bottom-sheet" id="bottom-sheet">
+    <div class="bs-handle"></div>
+    <div class="bs-header">
+      <span class="bs-title" id="bs-title">시설 목록</span>
+      <button class="btn-close" onclick="closeBs()">✕</button>
+    </div>
+    <div class="bs-scroll" id="bs-scroll"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- 동네 설정 모달 -->
+<div class="modal-backdrop" id="location-modal" onclick="closeModal('location-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>내 동네 설정</h2>
+      <button class="btn-close" onclick="closeModal('location-modal')">✕</button>
+    </div>
+    <p class="modal-desc">당근마켓처럼 우리 동네를 설정하면<br>그 지역 아이돌봄 장소만 먼저 보여드려요.</p>
+    <div class="loc-input-wrap">
+      <input class="loc-input" id="loc-input" type="text"
+             placeholder="예: 홍성군, 예산군, 화성시 동탄구..."
+             oninput="filterSuggestions(this.value)" autocomplete="off">
+    </div>
+    <div class="loc-suggestions" id="loc-suggestions"></div>
+    <button class="btn-loc-all" onclick="setNeighborhood('','전국')">🌏 전국 전체 보기</button>
+  </div>
+</div>
+
+<!-- 업체·기관 등록 모달 -->
+<div class="modal-backdrop" id="vendor-modal" onclick="closeModal('vendor-modal')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>🏪 업체·기관 무료 등록</h2>
+      <button class="btn-close" onclick="closeModal('vendor-modal')">✕</button>
+    </div>
+    <p class="modal-desc">오늘아이돌봄지도에 등록하면 지역 부모에게 우리 기관이 노출됩니다.<br><b>초기 등록 기관은 상단 우선 노출</b> 혜택이 적용됩니다.</p>
+
+    <!-- 혜택 3종 -->
+    <div class="vendor-benefits">
+      <div>
+        <b>🆓</b>
+        <span>등록비 0원<br>완전 무료</span>
+      </div>
+      <div>
+        <b>📍</b>
+        <span>지도·검색<br>노출</span>
+      </div>
+      <div>
+        <b>📞</b>
+        <span>전화·예약링크<br>직접 연결</span>
+      </div>
+    </div>
+
+    <!-- 등록 가능 업체 유형 -->
+    <div class="vendor-type-list">
+      <div class="vendor-type-title">등록 가능한 기관·업체</div>
+      <div class="vendor-types">
+        <span>🎪 키즈카페</span>
+        <span>🏃 실내놀이터</span>
+        <span>🎨 체험수업</span>
+        <span>🌿 공동육아나눔터</span>
+        <span>📚 도서관 프로그램</span>
+        <span>🍳 키즈쿠킹</span>
+        <span>🌲 숲체험</span>
+        <span>🏫 방학특강</span>
+      </div>
+    </div>
+
+    <!-- 준비 사항 -->
+    <div class="vendor-checklist">
+      <h3>📋 등록 전 준비하면 좋은 정보</h3>
+      <ul>
+        <li>업체·기관명, 대표전화, 주소</li>
+        <li>카테고리 구분 (키즈카페 / 체험수업 / 공동육아 등)</li>
+        <li>공식 홈페이지·인스타·예약 링크 <em style="color:var(--brand);font-size:10px">(있으면 우선 노출)</em></li>
+        <li>네이버지도 또는 카카오맵 링크</li>
+      </ul>
+    </div>
+
+    <div class="vendor-notice gray">
+      담당자명·개인 연락처는 내부 검수용으로만 사용하고 공개 화면에는 노출하지 않습니다.<br>
+      등록 후 <b>1~3일 내 검수</b>를 거쳐 지도에 반영됩니다.
+    </div>
+
+    <div class="vendor-actions">
+      <button class="btn-v-reset" onclick="closeModal('vendor-modal')">닫기</button>
+      <button class="btn-v-submit" onclick="openVendorGoogleForm()">구글폼으로 무료 등록하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 법적 고지 모달 (최초 1회) -->
+<div class="modal-backdrop" id="legal-modal">
+  <div class="modal modal-legal">
+    <img class="legal-icon" src="icons/todaycare-bear.svg" alt="" aria-hidden="true">
+    <h2>오늘아이돌봄에 오신 걸 환영해요</h2>
+    <p class="legal-sub">우리 동네에서 오늘 아이를 맡길 수 있는 곳을 쉽게 찾아드려요.</p>
+    <div class="legal-list">
+      <div class="legal-item">
+        <span class="legal-badge badge-direct">업체등록</span>
+        <span>업체·기관이 직접 제출했고 운영자가 검수한 정보에만 표시</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-public">공식DB</span>
+        <span>공공데이터·지자체 공개 정보 기반</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-link">외부확인</span>
+        <span>네이버·카카오 지도 위치 확인용 외부 링크</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-link">지도정책</span>
+        <span>카카오맵은 지도 배경과 자체 DB 마커 표시용으로만 사용</span>
+      </div>
+      <div class="legal-item">
+        <span class="legal-badge badge-public">정기등록</span>
+        <span>초등돌봄은 대부분 대상 조건·정기 등록 확인이 필요</span>
+      </div>
+    </div>
+    <p class="legal-notice">실제 운영 여부·예약 가능 여부·요금은 반드시 해당 기관에 직접 확인하세요.</p>
+    <div class="legal-links">
+      <a href="privacy.html">개인정보처리방침</a>
+      <span>·</span>
+      <a href="terms.html">이용안내</a>
+    </div>
+    <button class="btn-legal-confirm" onclick="confirmLegal()">확인하고 시작하기 →</button>
+  </div>
+</div>
+
+<!-- PWA 설치 안내 모달 -->
+<div class="modal-backdrop" id="install-help-modal" onclick="closeModal('install-help-modal')">
+  <div class="modal modal-install-help" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>앱 설치 안내</h2>
+      <button class="btn-close" onclick="closeModal('install-help-modal')">✕</button>
+    </div>
+    <img class="install-help-icon" src="icons/todaycare-bear.svg" alt="" aria-hidden="true">
+    <p class="modal-desc">설치 팝업이 바로 뜨지 않으면 아래 방법으로 홈 화면에 추가할 수 있어요.</p>
+    <div class="install-help-list">
+      <div>
+        <b>Android Chrome</b>
+        <span>오른쪽 위 ⋮ 메뉴 → 앱 설치 또는 홈 화면에 추가</span>
+      </div>
+      <div>
+        <b>Samsung Internet</b>
+        <span>메뉴 → 현재 페이지 추가 → 홈 화면</span>
+      </div>
+      <div>
+        <b>iPhone Safari</b>
+        <span>공유 버튼 → 홈 화면에 추가</span>
+      </div>
+    </div>
+    <div class="vendor-notice gray">
+      Google 앱, 카카오톡, 네이버앱 안에서 연 브라우저는 설치 팝업을 지원하지 않을 수 있습니다. 그 경우 Chrome 또는 Safari에서 todaycare.kr을 다시 열어주세요.
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
+
