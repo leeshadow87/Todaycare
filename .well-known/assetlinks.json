@@ -1,8 +1,0 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "kr.todaycare.app",
-    "sha256_cert_fingerprints": ["1C:8C:7A:F8:52:C8:93:4B:56:CF:47:66:E0:4C:C8:DE:A2:36:E8:6D:96:45:14:C1:FB:0F:EE:05:E4:29:86:B3"]
-  }
-}]
